@@ -72,7 +72,7 @@ const SupplierTracker: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="p-8 space-y-6">
+      <div className="p-4 md:p-6 space-y-4">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Supplier Tracker</h1>
           <p className="text-gray-600">Loading supplier data...</p>
@@ -83,7 +83,7 @@ const SupplierTracker: React.FC = () => {
 
   if (error) {
     return (
-      <div className="p-8 space-y-6">
+      <div className="p-4 md:p-6 space-y-4">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Supplier Tracker</h1>
           <p className="text-red-600">Error loading supplier data. Please try again.</p>
@@ -93,7 +93,7 @@ const SupplierTracker: React.FC = () => {
   }
 
   return (
-    <div className="p-4 md:p-8 space-y-4 md:space-y-6">
+    <div className="p-3 md:p-6 space-y-3 md:space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -103,8 +103,8 @@ const SupplierTracker: React.FC = () => {
       </div>
 
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
             <Building2 className="h-8 w-8 text-blue-600" />
             <div className="ml-4">
@@ -114,7 +114,7 @@ const SupplierTracker: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
             <CheckCircle className="h-8 w-8 text-green-600" />
             <div className="ml-4">
@@ -124,7 +124,7 @@ const SupplierTracker: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
             <AlertTriangle className="h-8 w-8 text-red-600" />
             <div className="ml-4">
@@ -134,7 +134,7 @@ const SupplierTracker: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
             <Shield className="h-8 w-8 text-blue-600" />
             <div className="ml-4">
@@ -146,7 +146,7 @@ const SupplierTracker: React.FC = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white p-3 md:p-4 rounded-lg shadow-sm border border-gray-200">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -164,7 +164,7 @@ const SupplierTracker: React.FC = () => {
       {/* Selected Supplier Actions - Moved to Top */}
       {selectedSupplier && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-4 md:mb-6">
-          <div className="p-4 bg-gray-50 border-b border-gray-200">
+          <div className="p-3 md:p-4 bg-gray-50 border-b border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-medium text-gray-900">
@@ -173,13 +173,13 @@ const SupplierTracker: React.FC = () => {
                 <p className="text-xs text-gray-600">Choose an action for this supplier</p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button 
+                <button
                   onClick={handleViewPortal}
-                  className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                  className="flex items-center px-2 sm:px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
                 >
                   <ExternalLink className="h-4 w-4 mr-2" />
                   View Portal
-                </button>
+                </button> 
                 <button 
                   onClick={handleAnalyzeCompliance}
                   className="flex items-center px-3 py-1.5 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 text-sm"
@@ -195,7 +195,7 @@ const SupplierTracker: React.FC = () => {
 
       {/* Suppliers Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="overflow-x-auto w-full">
+        <div className="overflow-x-auto w-full rounded-lg">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -231,7 +231,7 @@ const SupplierTracker: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{supplier.name}</div>
-                      <div className="text-sm text-gray-500 truncate max-w-[150px]">{supplier.category}</div>
+                      <div className="text-sm text-gray-500 truncate max-w-[120px] md:max-w-[150px]">{supplier.category}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

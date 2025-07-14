@@ -98,16 +98,16 @@ const RiskComplianceDashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-6">
+    <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Risk & Compliance Dashboard</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Risk & Compliance Dashboard</h1>
         <p className="text-gray-600 mt-2">Monitor supplier risks and compliance status in real-time</p>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-red-100 rounded-lg">
               <AlertTriangle className="h-6 w-6 text-red-600" />
@@ -119,7 +119,7 @@ const RiskComplianceDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
               <TrendingUp className="h-6 w-6 text-blue-600" />
@@ -131,7 +131,7 @@ const RiskComplianceDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-green-100 rounded-lg">
               <Shield className="h-6 w-6 text-green-600" />
@@ -143,7 +143,7 @@ const RiskComplianceDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-yellow-100 rounded-lg">
               <FileCheck className="h-6 w-6 text-yellow-600" />
@@ -157,7 +157,7 @@ const RiskComplianceDashboard: React.FC = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
         {/* Risk Alerts */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-4 border-b border-gray-200">
@@ -166,7 +166,7 @@ const RiskComplianceDashboard: React.FC = () => {
               Active Risk Alerts
             </h2>
           </div>
-          <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
+          <div className="p-3 md:p-4 space-y-2 md:space-y-3 max-h-80 md:max-h-96 overflow-y-auto">
             {riskAlerts.map((alert) => (
               <div key={alert.id} className="border border-gray-200 rounded-lg">
                 <div 
@@ -228,7 +228,7 @@ const RiskComplianceDashboard: React.FC = () => {
               Risk Trends
             </h2>
           </div>
-          <div className="p-6">
+          <div className="p-4 md:p-6">
             <div className="space-y-6">
               <div>
                 <div className="flex justify-between items-center mb-2">
@@ -281,7 +281,7 @@ const RiskComplianceDashboard: React.FC = () => {
               Active Compliance Alerts
             </h2>
           </div>
-          <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
+          <div className="p-3 md:p-4 space-y-2 md:space-y-3 max-h-80 md:max-h-96 overflow-y-auto">
             {complianceAlerts.map((alert) => (
               <div key={alert.id} className="border border-gray-200 rounded-lg">
                 <div 
@@ -329,7 +329,7 @@ const RiskComplianceDashboard: React.FC = () => {
               Compliance Trends
             </h2>
           </div>
-          <div className="p-6">
+          <div className="p-4 md:p-6">
             <div className="space-y-6">
               <div>
                 <div className="flex justify-between items-center mb-2">

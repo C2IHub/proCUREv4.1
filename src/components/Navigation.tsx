@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Shield, 
   FileText, 
@@ -27,6 +27,7 @@ interface NavigationProps {
 
 export default function Navigation({ currentUser, isOpen, onToggle }: NavigationProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const navigationSections = [
@@ -65,7 +66,7 @@ export default function Navigation({ currentUser, isOpen, onToggle }: Navigation
           return (
             <Link
               key={item.name}
-              to={item.href}
+              to={item.href} 
               className={`flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
                 isActive
                   ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
@@ -84,7 +85,7 @@ export default function Navigation({ currentUser, isOpen, onToggle }: Navigation
   return (
     <>
       {/* Mobile menu button */}
-      <button 
+      <button
         onClick={onToggle}
         className="fixed top-4 left-4 z-50 md:hidden bg-white p-2 rounded-md shadow-md border border-gray-200"
       >
@@ -99,8 +100,8 @@ export default function Navigation({ currentUser, isOpen, onToggle }: Navigation
         />
       )}
       
-      <div className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 transition-all duration-300 ${
-        isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      <div className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto ${
+        isOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-64 w-3/4'
       } md:w-64 w-3/4`}>
       {/* Logo */}
       <div className="flex items-center px-6 py-4 border-b border-gray-200">
@@ -114,7 +115,7 @@ export default function Navigation({ currentUser, isOpen, onToggle }: Navigation
       </div>
 
       {/* Navigation */}
-      <nav className="px-4 py-6 space-y-6">
+      <nav className="px-4 py-6 space-y-6 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 180px)' }}>
         {navigationSections.map(renderNavSection)}
       </nav>
 
@@ -123,7 +124,7 @@ export default function Navigation({ currentUser, isOpen, onToggle }: Navigation
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
-            className="flex items-center w-full px-3 py-2 text-sm rounded-lg hover:bg-gray-50"
+            className="flex items-center w-full px-3 py-2 text-sm rounded-lg hover:bg-gray-50 overflow-hidden"
           >
             <img
               src={currentUser.avatar}
@@ -131,7 +132,7 @@ export default function Navigation({ currentUser, isOpen, onToggle }: Navigation
               className="h-8 w-8 rounded-full object-cover"
             />
             <div className="ml-3 text-left flex-1">
-              <p className="font-medium text-gray-900">{currentUser.name}</p>
+              <p className="font-medium text-gray-900 truncate">{currentUser.name}</p>
               <p className="text-xs text-gray-500">{currentUser.role}</p>
             </div>
             <ChevronDown className="h-4 w-4 text-gray-400" />
@@ -140,12 +141,12 @@ export default function Navigation({ currentUser, isOpen, onToggle }: Navigation
           {showUserMenu && (
             <div className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-lg shadow-lg">
               <div className="py-1">
-                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                <button onClick={() => navigate('/settings')} className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                   <Settings className="mr-3 h-4 w-4" />
                   Settings
                 </button>
-                <button className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                  <LogOut className="mr-3 h-4 w-4" />
+                <button onClick={() => alert('Sign out functionality would go here')} className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  <LogOut className="mr-3 h-4 w-4" /> 
                   Sign out
                 </button>
               </div>

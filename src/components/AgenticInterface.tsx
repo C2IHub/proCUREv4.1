@@ -204,8 +204,8 @@ export default function AgenticInterface({
   };
 
   return (
-    <div className={`h-full bg-white border-l border-gray-200 shadow-lg transition-all duration-300 ${
-      isOpen ? 'w-[320px] lg:w-[400px]' : 'w-12'
+    <div className={`h-full bg-white border-l border-gray-200 shadow-lg transition-all duration-300 flex flex-col ${
+      isOpen ? 'w-full sm:w-[320px] lg:w-[400px]' : 'w-12'
     }`}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-purple-100">
@@ -267,7 +267,7 @@ export default function AgenticInterface({
           {/* Chat Messages */}
           <div 
             className="flex-1 overflow-y-auto p-4 space-y-4" 
-            style={{ height: 'calc(100vh - 320px)', maxHeight: '400px' }}
+            style={{ height: 'calc(100vh - 320px)', minHeight: '200px' }}
             id="messages-container"
           >
             {messages.length === 0 && (
@@ -303,7 +303,7 @@ export default function AgenticInterface({
           </div>
 
           {/* Input Area */}
-          <div className="p-4 border-t border-gray-200 bg-white sticky bottom-0">
+          <div className="p-4 border-t border-gray-200 bg-white sticky bottom-0 mt-auto">
             <div className="flex space-x-2">
               <div className="flex-1 relative">
                 <textarea
@@ -338,8 +338,8 @@ export default function AgenticInterface({
       {/* Minimized State */}
       {!isOpen && (
         <div className="p-4 text-center">
-          <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-          <p className="text-xs text-gray-500 transform -rotate-90 whitespace-nowrap">proCURE AI</p>
+          <Brain className="h-6 w-6 text-purple-600 mx-auto mb-2" />
+          <p className="text-xs text-gray-500 transform -rotate-90 whitespace-nowrap hidden md:block">proCURE AI</p>
         </div>
       )}
     </div>

@@ -224,7 +224,7 @@ export default function RFPTracker() {
   }, []);
 
   return (
-    <div className="p-4 md:p-8">
+    <div className="p-3 md:p-6">
       {/* RFP Details View */}
       {currentView === 'details' && selectedRFPData && (
         <div className="space-y-6">
@@ -233,16 +233,16 @@ export default function RFPTracker() {
             <div className="flex items-center mb-4">
               <button 
                 onClick={handleBackToList}
-                className="flex items-center text-blue-600 hover:text-blue-800 mr-4"
+                className="flex items-center text-blue-600 hover:text-blue-800"
               >
                 <ArrowLeft className="h-4 w-4 mr-1" /> Back to RFP List
               </button>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">RFP Details</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">RFP Details</h1>
             <p className="text-gray-600">{selectedRFPData.title}</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 md:p-6 lg:p-8">
             <div className="space-y-6">
               {/* Basic Info */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
@@ -456,10 +456,10 @@ export default function RFPTracker() {
       {/* Header */}
       {currentView === 'list' && (
         <>
-          <div className="mb-4 md:mb-6">
+          <div className="mb-3 md:mb-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">RFP Tracker</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">RFP Tracker</h1>
             <p className="text-gray-600">Monitor and manage all RFP processes from creation to award</p>
           </div>
           <button 
@@ -473,8 +473,8 @@ export default function RFPTracker() {
       </div>
 
       {/* Summary Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 md:mb-6">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div className="p-2 bg-blue-50 rounded-lg">
               <FileText className="h-5 w-5 text-blue-600" />
@@ -487,7 +487,7 @@ export default function RFPTracker() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div className="p-2 bg-yellow-50 rounded-lg">
               <Clock className="h-5 w-5 text-yellow-600" />
@@ -504,7 +504,7 @@ export default function RFPTracker() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div className="p-2 bg-purple-50 rounded-lg">
               <TrendingUp className="h-5 w-5 text-purple-600" />
@@ -521,7 +521,7 @@ export default function RFPTracker() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div className="p-2 bg-green-50 rounded-lg">
               <CheckCircle className="h-5 w-5 text-green-600" />
@@ -540,7 +540,7 @@ export default function RFPTracker() {
       </div>
 
       {/* Search */}
-      <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white p-3 md:p-4 rounded-lg shadow-sm border border-gray-200">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -558,7 +558,7 @@ export default function RFPTracker() {
       {/* Selected RFP Actions */}
       {selectedRFP && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 md:mb-6">
-          <div className="p-4 bg-gray-50 border-b border-gray-200">
+          <div className="p-3 md:p-4 bg-gray-50 border-b border-gray-200">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-medium text-gray-900">
@@ -566,7 +566,7 @@ export default function RFPTracker() {
                 </h3>
                 <p className="text-xs text-gray-600">Choose an action for this RFP</p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1 md:gap-2">
                 <button
                   onClick={handleViewDetails}
                   className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
@@ -596,7 +596,7 @@ export default function RFPTracker() {
 
       {/* RFP Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="overflow-x-auto w-full">
+          <div className="overflow-x-auto w-full rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -622,7 +622,7 @@ export default function RFPTracker() {
                       }`}
                     >
                       <td className="px-6 py-4">
-                        <div>
+                        <div className="max-w-[200px] md:max-w-full">
                           <div className="text-sm font-medium text-gray-900">{rfp.title}</div>
                           <div className="text-sm text-gray-500">{rfp.id}</div>
                           <div className="flex flex-wrap gap-1 mt-1 max-w-[200px]">
@@ -636,7 +636,7 @@ export default function RFPTracker() {
                       </td>
                       <td className="px-6 py-4">
                         <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(rfp.status)}`}>
-                          {getStatusIcon(rfp.status)}
+                          <span className="hidden sm:inline">{getStatusIcon(rfp.status)}</span>
                           <span className="ml-1">{formatStatus(rfp.status)}</span>
                         </div>
                       </td>
@@ -644,7 +644,7 @@ export default function RFPTracker() {
                         <div className="flex items-center">
                           <div className="w-16 bg-gray-200 rounded-full h-2 mr-3">
                             <div 
-                              className={`h-2 rounded-full ${getProgressColor(rfp.progress)}`}
+                              className={`h-2 rounded-full ${getProgressColor(rfp.progress)}`} 
                               style={{ width: `${rfp.progress}%` }}
                             ></div>
                           </div>
@@ -652,7 +652,7 @@ export default function RFPTracker() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">{rfp.responsesReceived}/{rfp.suppliersInvited}</div>
+                        <div className="text-sm text-gray-900 whitespace-nowrap">{rfp.responsesReceived}/{rfp.suppliersInvited}</div>
                         <div className="text-xs text-gray-500">suppliers</div>
                       </td>
                       <td className="px-6 py-4">
