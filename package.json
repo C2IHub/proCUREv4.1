@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test:integration": "ts-node tests/bedrock-integration.test.ts",
-    "test:bedrock": "ts-node tests/bedrock-integration.test.ts"
+    "test:bedrock": "ts-node tests/bedrock-integration.test.ts",
+    "validate:agent-cards": "node scripts/validate-agent-cards.js"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-agent": "^3.844.0",
