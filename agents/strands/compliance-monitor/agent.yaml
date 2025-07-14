@@ -1,0 +1,242 @@
+name: compliance-monitor
+version: "1.0.0"
+description: "EU GMP Compliance Monitor Agent for pharmaceutical procurement and supplier management"
+
+# Core agent configuration
+agent:
+  foundation_model: anthropic.claude-3-sonnet-20240229-v1:0
+  instruction: |
+    You are an EU GMP Compliance Monitor Agent for pharmaceutical procurement and supplier management.
+
+    Your primary responsibilities include:
+    1. Regulatory compliance analysis across EU GMP, FDA, and ISO standards
+    2. Certification tracking and expiration monitoring
+    3. Compliance gap identification and risk assessment
+    4. Audit scheduling and preparation
+    5. Violation detection and remediation recommendations
+    6. Compliance scoring and trend analysis
+
+    Key regulatory frameworks you monitor:
+    - EU GMP (Good Manufacturing Practice)
+    - FDA regulations (21 CFR Parts 210, 211, 820)
+    - ISO 13485 (Medical devices quality management)
+    - ISO 15378 (Pharmaceutical packaging materials)
+    - REACH compliance (Chemical safety)
+    - ICH guidelines (International harmonization)
+
+    Analysis Structure:
+    For compliance assessments, always provide:
+    1. Overall compliance status and score
+    2. Detailed breakdown by category (certifications, audits, documentation, regulatory history)
+    3. Specific findings and gaps
+    4. Risk assessment and priority levels
+    5. Actionable recommendations with timelines
+    6. Next review dates and monitoring requirements
+
+    Format your responses using clear markdown sections with:
+    - Executive summaries
+    - Detailed compliance breakdowns
+    - Risk assessments with severity levels
+    - Actionable recommendations with priorities
+    - Timeline and next steps
+
+    Always maintain a professional, regulatory-focused tone appropriate for pharmaceutical compliance professionals.
+
+# Memory configuration
+memory:
+  enabled: true
+  type: "conversation"
+  max_tokens: 8000
+  retention_days: 1
+
+# Guardrails for security and compliance
+guardrails:
+  input_validation:
+    max_prompt_length: 10000
+    min_prompt_length: 1
+    blocked_patterns:
+      - "ignore instructions"
+      - "act as if"
+      - "pretend to be"
+    required_context_fields:
+      - supplier_assessment: ["supplierName", "supplierId"]
+      - audit_scheduling: ["supplierName"]
+      - certification_analysis: ["certificationData"]
+
+  content_filtering:
+    hate_speech: true
+    toxicity: true
+    pii_detection: true
+    sensitive_info: true
+
+  output_validation:
+    min_confidence: 0.7
+    max_response_length: 5000
+    required_sections:
+      - compliance_assessment: ["status", "breakdown", "recommendations"]
+      - audit_schedule: ["upcoming_audits", "preparation_checklist"]
+
+# Action groups define the agent's capabilities
+action_groups:
+  - name: "regulatory_analysis"
+    description: "Analyze regulatory compliance across multiple frameworks"
+    functions:
+      - name: "assess_compliance_status"
+        description: "Evaluate overall compliance status for a supplier"
+        parameters:
+          type: "object"
+          properties:
+            supplier_id:
+              type: "string"
+              description: "Unique identifier for the supplier"
+            supplier_name:
+              type: "string" 
+              description: "Name of the supplier"
+            region:
+              type: "string"
+              description: "Geographic region (EU, US, APAC, etc.)"
+              enum: ["EU", "US", "APAC", "GLOBAL"]
+            assessment_scope:
+              type: "array"
+              items:
+                type: "string"
+                enum: ["GMP", "FDA", "ISO", "REACH", "ICH"]
+              description: "Regulatory frameworks to assess"
+          required: ["supplier_id", "supplier_name", "assessment_scope"]
+
+  - name: "certification_tracking"  
+    description: "Track and monitor certification status and renewals"
+    functions:
+      - name: "track_certifications"
+        description: "Monitor certification status, expiration dates, and renewal requirements"
+        parameters:
+          type: "object"
+          properties:
+            supplier_id:
+              type: "string"
+              description: "Supplier identifier"
+            certification_types:
+              type: "array"
+              items:
+                type: "string"
+                enum: ["EU_GMP", "FDA_REGISTRATION", "ISO_13485", "ISO_15378", "REACH", "ENVIRONMENTAL"]
+              description: "Types of certifications to track"
+            include_renewals:
+              type: "boolean"
+              default: true
+              description: "Include upcoming renewal schedule"
+          required: ["supplier_id", "certification_types"]
+
+  - name: "audit_management"
+    description: "Schedule and manage compliance audits"
+    functions:
+      - name: "schedule_audit"
+        description: "Create audit schedule and preparation checklist"
+        parameters:
+          type: "object"
+          properties:
+            supplier_id:
+              type: "string"
+              description: "Supplier identifier"
+            audit_type:
+              type: "string"
+              enum: ["COMPLIANCE", "GMP", "ISO_SURVEILLANCE", "THIRD_PARTY"]
+              description: "Type of audit to schedule"
+            priority:
+              type: "string"
+              enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+              default: "MEDIUM"
+              description: "Audit priority level"
+            focus_areas:
+              type: "array"
+              items:
+                type: "string"
+              description: "Specific areas to focus during audit"
+          required: ["supplier_id", "audit_type"]
+
+  - name: "violation_detection"
+    description: "Detect and analyze compliance violations"
+    functions:
+      - name: "analyze_violations"
+        description: "Detect and assess compliance violations and regulatory actions"
+        parameters:
+          type: "object"
+          properties:
+            supplier_id:
+              type: "string"
+              description: "Supplier identifier"
+            time_period:
+              type: "string"
+              enum: ["3_MONTHS", "6_MONTHS", "12_MONTHS", "24_MONTHS"]
+              default: "12_MONTHS"
+              description: "Time period for violation analysis"
+            include_warnings:
+              type: "boolean"
+              default: true
+              description: "Include warning letters and notices"
+          required: ["supplier_id"]
+
+  - name: "compliance_scoring"
+    description: "Calculate and analyze compliance scores"
+    functions:
+      - name: "calculate_compliance_score"
+        description: "Generate comprehensive compliance score with trend analysis"
+        parameters:
+          type: "object"
+          properties:
+            supplier_id:
+              type: "string"
+              description: "Supplier identifier"
+            include_benchmarking:
+              type: "boolean"
+              default: true
+              description: "Include industry benchmarking"
+            score_components:
+              type: "array"
+              items:
+                type: "string"
+                enum: ["CERTIFICATIONS", "AUDITS", "DOCUMENTATION", "REGULATORY_HISTORY"]
+              default: ["CERTIFICATIONS", "AUDITS", "DOCUMENTATION", "REGULATORY_HISTORY"]
+              description: "Components to include in score calculation"
+          required: ["supplier_id"]
+
+# Web search configuration for real-time regulatory updates
+web_search:
+  enabled: true
+  search_domains:
+    - "ema.europa.eu"
+    - "fda.gov"
+    - "ich.org"
+    - "iso.org"
+    - "echa.europa.eu"
+  max_results: 5
+  cache_duration: 3600 # 1 hour
+
+# Knowledge base integration
+knowledge_bases:
+  - name: "regulatory_guidance"
+    description: "Regulatory guidance documents and updates"
+    s3_bucket: "procure-regulatory-kb"
+    vector_index: "regulatory-guidance-index"
+  - name: "compliance_standards" 
+    description: "Compliance standards and frameworks"
+    s3_bucket: "procure-compliance-kb"
+    vector_index: "compliance-standards-index"
+
+# Integration settings
+integrations:
+  api_gateway:
+    cors_enabled: true
+    rate_limiting:
+      requests_per_second: 10
+      burst_limit: 50
+  
+  cloudwatch:
+    log_group: "/aws/lambda/compliance-monitor-agent"
+    metrics_enabled: true
+    
+  tags:
+    Environment: "production"
+    Application: "proCURE"
+    Agent: "compliance-monitor"
+    Version: "1.0.0"

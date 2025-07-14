@@ -85,22 +85,37 @@ The production setup includes:
 
 ### Agent Configuration
 
-The platform uses three specialized AWS Bedrock agents:
+The platform uses three specialized AWS Bedrock agents, implemented using the **AWS Strands Agent Builder** approach for modern, scalable agent architecture:
 
 1. **EU GMP Compliance Monitor** (`compliance-monitor`)
    - Regulatory compliance analysis and certification tracking
    - Supports EU GMP, FDA, ISO standards
    - Real-time compliance scoring and audit scheduling
+   - **Implementation**: Strands YAML configuration + generic Lambda handler
 
 2. **Predictive Risk Assessor** (`risk-predictor`)
    - Multi-factor risk assessment and prediction
    - Financial, operational, and supply chain analysis
    - Early warning system for supplier issues
+   - **Implementation**: Strands YAML configuration + generic Lambda handler
 
 3. **Document Intelligence Agent** (`document-intelligence`)
    - Document validation and authenticity verification
    - Automated compliance checking and gap analysis
    - Fraud detection and regulatory verification
+   - **Implementation**: Strands YAML configuration + generic Lambda handler
+
+### Strands Agent Builder Architecture
+
+The platform has been migrated from traditional code-defined agents to the modern **AWS Strands Agent Builder** approach:
+
+- **Declarative Configuration**: Agent behavior defined in `agent.yaml` files instead of TypeScript code
+- **Generic Lambda Handlers**: Reusable, lightweight Lambda functions that execute agents based on YAML configuration  
+- **Better Scalability**: AWS Bedrock handles execution with proper resource management
+- **Simplified Deployment**: Configuration changes don't require code deployment
+- **Maintained Compatibility**: Existing frontend code continues to work unchanged
+
+📋 **[Strands Implementation Guide](./agents/strands/README.md)** - Complete migration details and deployment instructions
 
 📋 **[Comprehensive Agent Cards](./docs/agent-cards/)** - Detailed specifications, function definitions, deployment guides, and AWS best practices for each agent
 

@@ -23,3 +23,15 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Strands Agent Build Artifacts
+agents/strands/*/node_modules/
+agents/strands/*/dist/
+agents/strands/*/*.zip
+agents/strands/*/*.js.map
+agents/strands/*/*.js
+!agents/strands/*/index.ts
+
+# CloudFormation and deployment artifacts
+cloudformation-template.yaml
+*.zip

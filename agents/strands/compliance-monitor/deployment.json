@@ -1,0 +1,262 @@
+{
+  "version": "1.0.0",
+  "name": "compliance-monitor-agent",
+  "description": "AWS Bedrock Agent deployment for EU GMP Compliance Monitor",
+  
+  "lambda": {
+    "functionName": "procure-compliance-monitor-agent",
+    "runtime": "nodejs18.x",
+    "handler": "index.handler",
+    "timeout": 300,
+    "memorySize": 512,
+    "environment": {
+      "NODE_ENV": "production",
+      "BEDROCK_REGION": "us-east-1",
+      "COMPLIANCE_MONITOR_AGENT_ID": "${BEDROCK_COMPLIANCE_AGENT_ID}",
+      "COMPLIANCE_MONITOR_AGENT_ALIAS_ID": "TSTALIASID"
+    },
+    "layers": [
+      "arn:aws:lambda:us-east-1:123456789012:layer:aws-sdk-v3:1"
+    ],
+    "tags": {
+      "Application": "proCURE",
+      "Agent": "compliance-monitor",
+      "Environment": "production",
+      "Version": "1.0.0"
+    }
+  },
+
+  "iam": {
+    "roleName": "procure-compliance-monitor-agent-role",
+    "policies": [
+      {
+        "name": "BedrockAgentInvokePolicy",
+        "version": "2012-10-17",
+        "statement": [
+          {
+            "effect": "Allow",
+            "action": [
+              "bedrock:InvokeAgent"
+            ],
+            "resource": [
+              "arn:aws:bedrock:us-east-1:${AWS_ACCOUNT_ID}:agent/${BEDROCK_COMPLIANCE_AGENT_ID}",
+              "arn:aws:bedrock:us-east-1:${AWS_ACCOUNT_ID}:agent-alias/${BEDROCK_COMPLIANCE_AGENT_ID}/*"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "CloudWatchLogsPolicy", 
+        "version": "2012-10-17",
+        "statement": [
+          {
+            "effect": "Allow",
+            "action": [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream", 
+              "logs:PutLogEvents"
+            ],
+            "resource": [
+              "arn:aws:logs:us-east-1:${AWS_ACCOUNT_ID}:log-group:/aws/lambda/procure-compliance-monitor-agent:*"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "KnowledgeBaseAccess",
+        "version": "2012-10-17", 
+        "statement": [
+          {
+            "effect": "Allow",
+            "action": [
+              "bedrock:Retrieve"
+            ],
+            "resource": [
+              "arn:aws:bedrock:us-east-1:${AWS_ACCOUNT_ID}:knowledge-base/*"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+
+  "apiGateway": {
+    "restApiName": "procure-compliance-monitor-api",
+    "stageName": "prod",
+    "description": "API Gateway for Compliance Monitor Agent",
+    "cors": {
+      "allowOrigin": "*",
+      "allowHeaders": ["Content-Type", "X-Amz-Date", "Authorization", "X-Api-Key", "X-Amz-Security-Token"],
+      "allowMethods": ["POST", "OPTIONS"]
+    },
+    "throttling": {
+      "rateLimit": 1000,
+      "burstLimit": 2000
+    },
+    "caching": {
+      "enabled": false
+    },
+    "endpoints": [
+      {
+        "path": "/invoke",
+        "method": "POST",
+        "integration": "lambda",
+        "description": "Invoke compliance monitor agent",
+        "requestValidation": {
+          "validateRequestBody": true,
+          "schema": {
+            "type": "object",
+            "properties": {
+              "prompt": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10000
+              },
+              "sessionId": {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9-_]+$"
+              },
+              "context": {
+                "type": "object"
+              }
+            },
+            "required": ["prompt"]
+          }
+        }
+      },
+      {
+        "path": "/health",
+        "method": "GET",
+        "integration": "lambda",
+        "description": "Health check endpoint"
+      }
+    ]
+  },
+
+  "cloudWatch": {
+    "logRetentionDays": 14,
+    "dashboards": [
+      {
+        "name": "ComplianceMonitorAgent",
+        "widgets": [
+          {
+            "type": "metric",
+            "properties": {
+              "metrics": [
+                ["AWS/Lambda", "Duration", "FunctionName", "procure-compliance-monitor-agent"],
+                ["AWS/Lambda", "Errors", "FunctionName", "procure-compliance-monitor-agent"],
+                ["AWS/Lambda", "Invocations", "FunctionName", "procure-compliance-monitor-agent"]
+              ],
+              "period": 300,
+              "stat": "Average",
+              "region": "us-east-1",
+              "title": "Lambda Metrics"
+            }
+          },
+          {
+            "type": "metric",
+            "properties": {
+              "metrics": [
+                ["AWS/ApiGateway", "Count", "ApiName", "procure-compliance-monitor-api"],
+                ["AWS/ApiGateway", "Latency", "ApiName", "procure-compliance-monitor-api"],
+                ["AWS/ApiGateway", "4XXError", "ApiName", "procure-compliance-monitor-api"],
+                ["AWS/ApiGateway", "5XXError", "ApiName", "procure-compliance-monitor-api"]
+              ],
+              "period": 300,
+              "stat": "Sum",
+              "region": "us-east-1", 
+              "title": "API Gateway Metrics"
+            }
+          }
+        ]
+      }
+    ],
+    "alarms": [
+      {
+        "name": "ComplianceMonitorAgent-HighErrorRate",
+        "description": "Alert when error rate exceeds 5%",
+        "metricName": "Errors",
+        "namespace": "AWS/Lambda",
+        "statistic": "Sum",
+        "period": 300,
+        "evaluationPeriods": 2,
+        "threshold": 5,
+        "comparisonOperator": "GreaterThanThreshold",
+        "dimensions": {
+          "FunctionName": "procure-compliance-monitor-agent"
+        }
+      },
+      {
+        "name": "ComplianceMonitorAgent-HighLatency",
+        "description": "Alert when duration exceeds 30 seconds",
+        "metricName": "Duration", 
+        "namespace": "AWS/Lambda",
+        "statistic": "Average",
+        "period": 300,
+        "evaluationPeriods": 2,
+        "threshold": 30000,
+        "comparisonOperator": "GreaterThanThreshold",
+        "dimensions": {
+          "FunctionName": "procure-compliance-monitor-agent"
+        }
+      }
+    ]
+  },
+
+  "deployment": {
+    "strategy": "blue-green",
+    "environments": {
+      "development": {
+        "lambdaAlias": "dev",
+        "apiGatewayStage": "dev",
+        "environmentVariables": {
+          "NODE_ENV": "development",
+          "LOG_LEVEL": "debug"
+        }
+      },
+      "staging": {
+        "lambdaAlias": "staging", 
+        "apiGatewayStage": "staging",
+        "environmentVariables": {
+          "NODE_ENV": "staging",
+          "LOG_LEVEL": "info"
+        }
+      },
+      "production": {
+        "lambdaAlias": "prod",
+        "apiGatewayStage": "prod", 
+        "environmentVariables": {
+          "NODE_ENV": "production",
+          "LOG_LEVEL": "warn"
+        }
+      }
+    }
+  },
+
+  "security": {
+    "encryptionAtRest": true,
+    "encryptionInTransit": true,
+    "vpc": {
+      "enabled": false,
+      "subnetIds": [],
+      "securityGroupIds": []
+    },
+    "waf": {
+      "enabled": true,
+      "rules": [
+        "AWSManagedRulesCommonRuleSet",
+        "AWSManagedRulesKnownBadInputsRuleSet"
+      ]
+    }
+  },
+
+  "cost": {
+    "budgetAlert": {
+      "name": "ComplianceMonitorAgentBudget",
+      "amount": 100,
+      "currency": "USD",
+      "timeUnit": "MONTHLY",
+      "threshold": 80
+    }
+  }
+}

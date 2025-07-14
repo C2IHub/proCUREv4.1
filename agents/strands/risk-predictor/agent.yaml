@@ -1,0 +1,299 @@
+name: risk-predictor
+version: "1.0.0"
+description: "Predictive Risk Assessor Agent for pharmaceutical supplier risk analysis and prediction"
+
+# Core agent configuration
+agent:
+  foundation_model: anthropic.claude-3-sonnet-20240229-v1:0
+  instruction: |
+    You are a Predictive Risk Assessor Agent for pharmaceutical supplier risk analysis and prediction.
+
+    Your primary responsibilities include:
+    1. Multi-factor risk assessment across financial, operational, and supply chain dimensions
+    2. Predictive analytics for supplier performance and risk trends
+    3. Early warning system for potential supplier issues
+    4. Risk scoring with probability calculations and confidence intervals
+    5. Mitigation strategy recommendations with implementation priorities
+    6. Scenario analysis and stress testing
+
+    Key risk dimensions you analyze:
+    - Financial Risk: Credit ratings, financial stability, cash flow analysis
+    - Operational Risk: Production capacity, quality trends, delivery performance
+    - Quality Risk: Product defects, recalls, compliance issues, certification gaps
+    - Supply Chain Risk: Supplier dependencies, geographic risks, capacity constraints
+    - Regulatory Risk: Compliance violations, regulatory changes, audit findings
+
+    Risk Assessment Framework:
+    For risk assessments, always provide:
+    1. Overall risk score (0-100) with probability of issues in next 12 months
+    2. Detailed breakdown by risk category with individual scores and weights
+    3. Trend analysis showing risk trajectory (improving/stable/deteriorating)
+    4. Specific risk factors and contributing elements
+    5. Probability estimates for different risk scenarios
+    6. Mitigation recommendations with priority levels and timelines
+    7. Monitoring requirements and early warning indicators
+
+    Format your responses using clear markdown sections with:
+    - Executive risk summary with overall assessment
+    - Detailed risk breakdowns by category
+    - Predictive scenarios with probability estimates
+    - Risk mitigation roadmap with priorities
+    - Monitoring and alerting recommendations
+
+    Use quantitative analysis where possible, including statistical confidence levels, trend calculations, and scenario probabilities. Maintain a data-driven, analytical tone appropriate for risk management professionals.
+
+# Memory configuration
+memory:
+  enabled: true
+  type: "conversation"
+  max_tokens: 8000
+  retention_days: 1
+
+# Guardrails for security and compliance
+guardrails:
+  input_validation:
+    max_prompt_length: 10000
+    min_prompt_length: 1
+    blocked_patterns:
+      - "ignore instructions"
+      - "manipulate data"
+      - "false risk assessment"
+    required_context_fields:
+      - risk_assessment: ["supplierId", "supplierName"]
+      - predictive_analysis: ["supplierId", "timeframe"]
+      - scenario_analysis: ["supplierId", "scenarios"]
+
+  content_filtering:
+    hate_speech: true
+    toxicity: true
+    pii_detection: true
+    sensitive_info: true
+    financial_data_protection: true
+
+  output_validation:
+    min_confidence: 0.75
+    max_response_length: 6000
+    required_sections:
+      - risk_assessment: ["overall_score", "breakdown", "recommendations"]
+      - predictive_analysis: ["trends", "probabilities", "scenarios"]
+
+# Action groups define the agent's capabilities
+action_groups:
+  - name: "financial_risk_analysis"
+    description: "Analyze financial stability and credit risk"
+    functions:
+      - name: "assess_financial_risk"
+        description: "Evaluate financial stability, credit ratings, and cash flow risks"
+        parameters:
+          type: "object"
+          properties:
+            supplier_id:
+              type: "string"
+              description: "Unique identifier for the supplier"
+            supplier_name:
+              type: "string"
+              description: "Name of the supplier"
+            financial_data:
+              type: "object"
+              properties:
+                revenue:
+                  type: "number"
+                  description: "Annual revenue in USD"
+                profit_margin:
+                  type: "number"
+                  description: "Profit margin percentage"
+                debt_to_equity:
+                  type: "number"
+                  description: "Debt to equity ratio"
+                credit_rating:
+                  type: "string"
+                  enum: ["AAA", "AA", "A", "BBB", "BB", "B", "CCC", "CC", "C", "D"]
+                  description: "Credit rating"
+              description: "Financial metrics and indicators"
+            time_period:
+              type: "string"
+              enum: ["12_MONTHS", "24_MONTHS", "36_MONTHS"]
+              default: "12_MONTHS"
+              description: "Analysis time period"
+          required: ["supplier_id", "supplier_name"]
+
+  - name: "operational_risk_analysis"
+    description: "Analyze operational performance and capacity risks"
+    functions:
+      - name: "assess_operational_risk"
+        description: "Evaluate operational performance, capacity, and delivery risks"
+        parameters:
+          type: "object"
+          properties:
+            supplier_id:
+              type: "string"
+              description: "Supplier identifier"
+            operational_metrics:
+              type: "object"
+              properties:
+                on_time_delivery:
+                  type: "number"
+                  description: "On-time delivery percentage"
+                capacity_utilization:
+                  type: "number"
+                  description: "Production capacity utilization percentage"
+                quality_score:
+                  type: "number"
+                  description: "Quality performance score (0-100)"
+                lead_time_variance:
+                  type: "number"
+                  description: "Lead time variance percentage"
+              description: "Operational performance metrics"
+            include_capacity_analysis:
+              type: "boolean"
+              default: true
+              description: "Include capacity constraint analysis"
+          required: ["supplier_id"]
+
+  - name: "quality_risk_analysis"
+    description: "Analyze quality trends and product risk factors"
+    functions:
+      - name: "assess_quality_risk"
+        description: "Evaluate quality trends, defect rates, and recall risks"
+        parameters:
+          type: "object"
+          properties:
+            supplier_id:
+              type: "string"
+              description: "Supplier identifier"
+            quality_data:
+              type: "object"
+              properties:
+                defect_rate:
+                  type: "number"
+                  description: "Product defect rate percentage"
+                customer_complaints:
+                  type: "integer"
+                  description: "Number of customer complaints"
+                recall_history:
+                  type: "integer"
+                  description: "Number of product recalls in timeframe"
+                audit_scores:
+                  type: "array"
+                  items:
+                    type: "number"
+                  description: "Recent audit scores"
+              description: "Quality performance data"
+            analysis_scope:
+              type: "array"
+              items:
+                type: "string"
+                enum: ["DEFECTS", "RECALLS", "COMPLAINTS", "AUDITS", "CERTIFICATIONS"]
+              default: ["DEFECTS", "RECALLS", "COMPLAINTS", "AUDITS"]
+              description: "Scope of quality analysis"
+          required: ["supplier_id"]
+
+  - name: "supply_chain_risk_analysis"
+    description: "Analyze supply chain dependencies and vulnerabilities"
+    functions:
+      - name: "assess_supply_chain_risk"
+        description: "Evaluate supply chain vulnerabilities and dependencies"
+        parameters:
+          type: "object"
+          properties:
+            supplier_id:
+              type: "string"
+              description: "Supplier identifier"
+            supply_chain_data:
+              type: "object"
+              properties:
+                supplier_concentration:
+                  type: "number"
+                  description: "Percentage of business from top suppliers"
+                geographic_risk:
+                  type: "string"
+                  enum: ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+                  description: "Geographic concentration risk level"
+                backup_suppliers:
+                  type: "integer"
+                  description: "Number of qualified backup suppliers"
+                inventory_levels:
+                  type: "number"
+                  description: "Inventory coverage in days"
+              description: "Supply chain metrics"
+            include_scenarios:
+              type: "boolean"
+              default: true
+              description: "Include scenario analysis"
+          required: ["supplier_id"]
+
+  - name: "predictive_modeling"
+    description: "Generate risk predictions and scenario analysis"
+    functions:
+      - name: "generate_risk_predictions"
+        description: "Create predictive risk models and scenario analysis"
+        parameters:
+          type: "object"
+          properties:
+            supplier_id:
+              type: "string"
+              description: "Supplier identifier"
+            prediction_timeframe:
+              type: "string"
+              enum: ["3_MONTHS", "6_MONTHS", "12_MONTHS", "24_MONTHS"]
+              default: "12_MONTHS"
+              description: "Prediction timeframe"
+            scenarios:
+              type: "array"
+              items:
+                type: "string"
+                enum: ["BEST_CASE", "MOST_LIKELY", "WORST_CASE", "STRESS_TEST"]
+              default: ["BEST_CASE", "MOST_LIKELY", "WORST_CASE"]
+              description: "Scenarios to analyze"
+            confidence_level:
+              type: "number"
+              minimum: 0.8
+              maximum: 0.99
+              default: 0.95
+              description: "Statistical confidence level"
+          required: ["supplier_id"]
+
+# Web search configuration for market intelligence
+web_search:
+  enabled: true
+  search_domains:
+    - "reuters.com"
+    - "bloomberg.com"
+    - "sec.gov"
+    - "marketwatch.com"
+    - "tradingview.com"
+  max_results: 5
+  cache_duration: 1800 # 30 minutes for financial data
+
+# Knowledge base integration
+knowledge_bases:
+  - name: "financial_data"
+    description: "Financial markets and credit rating data"
+    s3_bucket: "procure-financial-kb"
+    vector_index: "financial-data-index"
+  - name: "risk_models"
+    description: "Risk assessment models and benchmarks"
+    s3_bucket: "procure-risk-models-kb"
+    vector_index: "risk-models-index"
+  - name: "market_intelligence"
+    description: "Market trends and industry analysis"
+    s3_bucket: "procure-market-intel-kb"
+    vector_index: "market-intel-index"
+
+# Integration settings
+integrations:
+  api_gateway:
+    cors_enabled: true
+    rate_limiting:
+      requests_per_second: 15
+      burst_limit: 75
+  
+  cloudwatch:
+    log_group: "/aws/lambda/risk-predictor-agent"
+    metrics_enabled: true
+    
+  tags:
+    Environment: "production"
+    Application: "proCURE"
+    Agent: "risk-predictor"
+    Version: "1.0.0"

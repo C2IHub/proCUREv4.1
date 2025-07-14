@@ -10,7 +10,13 @@
     "preview": "vite preview",
     "test:integration": "ts-node tests/bedrock-integration.test.ts",
     "test:bedrock": "ts-node tests/bedrock-integration.test.ts",
-    "validate:agent-cards": "node scripts/validate-agent-cards.js"
+    "validate:agent-cards": "node scripts/validate-agent-cards.js",
+    "deploy:strands": "./scripts/deploy-strands-agents.sh deploy",
+    "validate:strands": "./scripts/deploy-strands-agents.sh validate",
+    "build:strands": "npm run build:strands:compliance && npm run build:strands:risk && npm run build:strands:document",
+    "build:strands:compliance": "cd agents/strands/compliance-monitor && npm install && npm run build",
+    "build:strands:risk": "cd agents/strands/risk-predictor && npm install && npm run build", 
+    "build:strands:document": "cd agents/strands/document-intelligence && npm install && npm run build"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-agent": "^3.844.0",

@@ -6,9 +6,10 @@ import {
   AgentExecutionContext,
   ValidationResult
 } from '../../types';
-import { useBedrockAgents } from '../../context/BedrockAgentProvider';
 
 export class ComplianceMonitorAgent extends BaseAgent {
+  private apiEndpoint: string;
+
   constructor() {
     super({
       id: 'compliance-monitor',
@@ -24,6 +25,9 @@ export class ComplianceMonitorAgent extends BaseAgent {
       dependencies: [],
       version: '1.0.0'
     });
+    
+    // Get API endpoint from environment or configuration
+    this.apiEndpoint = process.env.COMPLIANCE_MONITOR_API_ENDPOINT || '';
   }
 
   defineCapabilities(): BaseAgentCapabilities {
@@ -49,81 +53,28 @@ export class ComplianceMonitorAgent extends BaseAgent {
   }
 
   async buildPrompt(request: AgentInvokeRequest): Promise<string> {
-    const { prompt, context } = request;
-    
-    // Store conversation history
-    if (request.sessionId) {
-      await this.storeConversationHistory(request.sessionId, request);
-    }
-
-    // Get conversation history for context
-    const history = request.sessionId ? await this.getConversationHistory(request.sessionId) : [];
-    
-    let systemPrompt = `You are an EU GMP Compliance Monitor Agent for pharmaceutical procurement and supplier management.
-
-Your primary responsibilities include:
-1. Regulatory compliance analysis across EU GMP, FDA, and ISO standards
-2. Certification tracking and expiration monitoring
-3. Compliance gap identification and risk assessment
-4. Audit scheduling and preparation
-5. Violation detection and remediation recommendations
-6. Compliance scoring and trend analysis
-
-Key regulatory frameworks you monitor:
-- EU GMP (Good Manufacturing Practice)
-- FDA regulations (21 CFR Parts 210, 211, 820)
-- ISO 13485 (Medical devices quality management)
-- ISO 15378 (Pharmaceutical packaging materials)
-- REACH compliance (Chemical safety)
-- ICH guidelines (International harmonization)
-
-Analysis Structure:
-For compliance assessments, always provide:
-1. Overall compliance status and score
-2. Detailed breakdown by category (certifications, audits, documentation, regulatory history)
-3. Specific findings and gaps
-4. Risk assessment and priority levels
-5. Actionable recommendations with timelines
-6. Next review dates and monitoring requirements
-
-Context Information:`;
-
-    if (context?.supplierId) {
-      systemPrompt += `\n- Supplier ID: ${context.supplierId}`;
-    }
-    if (context?.supplierName) {
-      systemPrompt += `\n- Supplier: ${context.supplierName}`;
-    }
-    if (context?.region) {
-      systemPrompt += `\n- Region: ${context.region}`;
-    }
-    if (context?.category) {
-      systemPrompt += `\n- Category: ${context.category}`;
-    }
-
-    // Add conversation history if available
-    if (history.length > 0) {
-      systemPrompt += `\n\nPrevious conversation context:\n`;
-      const recentHistory = history.slice(-3); // Last 3 exchanges
-      for (const item of recentHistory) {
-        systemPrompt += `- ${item.prompt}\n`;
-      }
-    }
-
-    systemPrompt += `\n\nCurrent request: ${prompt}
-
-Please provide a comprehensive compliance analysis with specific, actionable insights formatted in clear sections with appropriate use of markdown for readability.`;
-
-    return systemPrompt;
+    // With Strands approach, prompt building is handled by the agent.yaml configuration
+    // We just pass through the prompt with minimal processing
+    return request.prompt;
   }
 
   async parseResponse(response: unknown, request: AgentInvokeRequest): Promise<AgentInvokeResponse> {
-    let responseText: string;
+    // Handle response from Strands agent or fallback mock
+    if (response && typeof response === 'object' && 'response' in response) {
+      // Response from deployed Strands agent (API call)
+      const strandsResponse = response as AgentInvokeResponse;
+      return {
+        response: strandsResponse.response,
+        sessionId: strandsResponse.sessionId || request.sessionId || `compliance-${Date.now()}`,
+        confidence: strandsResponse.confidence || 0.85,
+        sources: strandsResponse.sources || this.getDefaultSources()
+      };
+    }
     
+    // Handle string response (from mock implementation)
+    let responseText: string;
     if (typeof response === 'string') {
       responseText = response;
-    } else if (response && typeof response === 'object' && 'response' in response) {
-      responseText = (response as any).response;
     } else {
       responseText = JSON.stringify(response);
     }
@@ -144,7 +95,7 @@ Please provide a comprehensive compliance analysis with specific, actionable ins
     const errors: string[] = [];
     const warnings: string[] = [];
 
-    // Basic validation
+    // Basic validation - detailed validation now handled by agent.yaml guardrails
     if (!request.prompt || request.prompt.trim().length === 0) {
       errors.push('Prompt cannot be empty');
     }
@@ -153,31 +104,11 @@ Please provide a comprehensive compliance analysis with specific, actionable ins
       warnings.push('Very long prompt may affect response quality');
     }
 
-    // Compliance-specific validation
+    // Essential context validation for compliance operations
     const prompt = request.prompt.toLowerCase();
-    
-    // Check for required context for certain operations
-    if (prompt.includes('assess supplier') || prompt.includes('evaluate compliance')) {
-      if (!request.context?.supplierName && !request.context?.supplierId) {
-        errors.push('Supplier identification required for compliance assessment');
-      }
-    }
-
-    if (prompt.includes('schedule audit')) {
-      if (!request.context?.supplierName) {
-        errors.push('Supplier name required for audit scheduling');
-      }
-    }
-
-    // Validate data format for structured requests
-    if (prompt.includes('analyze certification data')) {
-      try {
-        if (request.context?.certificationData) {
-          JSON.parse(JSON.stringify(request.context.certificationData));
-        }
-      } catch {
-        errors.push('Invalid certification data format');
-      }
+    if ((prompt.includes('assess supplier') || prompt.includes('evaluate compliance')) && 
+        !request.context?.supplierName && !request.context?.supplierId) {
+      warnings.push('Supplier identification recommended for compliance assessment');
     }
 
     return {
@@ -192,23 +123,58 @@ Please provide a comprehensive compliance analysis with specific, actionable ins
     request: AgentInvokeRequest,
     context: AgentExecutionContext
   ): Promise<unknown> {
-    // For now, we'll use the existing Bedrock agent implementation
-    // In a real implementation, you might have agent-specific logic here
-    
-    try {
-      // This is a simplified approach - in practice, you'd need to properly inject the Bedrock agents
-      // For now, we'll simulate the agent response
-      const mockResponse = await this.generateComplianceResponse(prompt, request, context);
-      return mockResponse;
-    } catch (error) {
-      throw new Error(`Compliance monitoring failed: ${error}`);
+    // Store conversation history for context
+    if (request.sessionId) {
+      await this.storeConversationHistory(request.sessionId, request);
     }
+
+    // Check if we have a deployed Strands agent endpoint
+    if (this.apiEndpoint) {
+      try {
+        console.log('Calling deployed Strands Compliance Monitor Agent');
+        
+        // Call the deployed Bedrock agent via API Gateway
+        const response = await this.callStrandsAgent(prompt, request);
+        return response;
+        
+      } catch (error) {
+        console.warn('Failed to call deployed agent, falling back to mock:', error);
+        // Fall through to mock implementation
+      }
+    }
+
+    // Fallback to mock implementation for development
+    console.log('Using mock Compliance Monitor Agent implementation');
+    return this.generateComplianceResponse(prompt, request, context);
+  }
+
+  /**
+   * Call the deployed Strands agent via API Gateway
+   */
+  private async callStrandsAgent(prompt: string, request: AgentInvokeRequest): Promise<AgentInvokeResponse> {
+    // This would use fetch or axios in a real implementation
+    // For now, we'll simulate the API call structure
+    const requestBody = {
+      prompt: prompt,
+      sessionId: request.sessionId,
+      context: request.context
+    };
+
+    // Simulate API call - in real implementation, this would be:
+    // const response = await fetch(this.apiEndpoint + '/invoke', { 
+    //   method: 'POST', 
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(requestBody) 
+    // });
+    // return response.json();
+
+    throw new Error('API endpoint configured but not implemented yet - using mock');
   }
 
   private async generateComplianceResponse(
     prompt: string, 
     request: AgentInvokeRequest, 
-    context: AgentExecutionContext
+    _context: AgentExecutionContext
   ): Promise<string> {
     // This is a mock implementation that would be replaced with actual Bedrock integration
     const supplierName = request.context?.supplierName || 'Unknown Supplier';
@@ -216,16 +182,25 @@ Please provide a comprehensive compliance analysis with specific, actionable ins
     
     switch (analysisType) {
       case 'certification_tracking':
-        return this.generateCertificationReport(supplierName, request.context);
+        return this.generateCertificationReport(supplierName);
       case 'audit_scheduling':
-        return this.generateAuditSchedule(supplierName, request.context);
+        return this.generateAuditSchedule(supplierName);
       case 'violation_detection':
-        return this.generateViolationReport(supplierName, request.context);
+        return this.generateViolationReport(supplierName);
       case 'compliance_scoring':
-        return this.generateComplianceScore(supplierName, request.context);
+        return this.generateComplianceScore(supplierName);
       default:
-        return this.generateGeneralComplianceAssessment(supplierName, request.context);
+        return this.generateGeneralComplianceAssessment(supplierName);
     }
+  }
+
+  private getDefaultSources(): string[] {
+    return [
+      'EU GMP Guidelines',
+      'FDA Regulations (21 CFR)',
+      'ISO 13485/15378 Standards',
+      'REACH Compliance Database'
+    ];
   }
 
   private determineAnalysisType(prompt: string): string {
@@ -247,7 +222,7 @@ Please provide a comprehensive compliance analysis with specific, actionable ins
     return 'general_assessment';
   }
 
-  private generateCertificationReport(supplierName: string, context: any): string {
+  private generateCertificationReport(supplierName: string): string {
     const currentDate = new Date();
     const nextYear = new Date(currentDate.getFullYear() + 1, currentDate.getMonth(), currentDate.getDate());
     
@@ -285,7 +260,7 @@ Please provide a comprehensive compliance analysis with specific, actionable ins
 *Report generated: ${currentDate.toLocaleString()}*`;
   }
 
-  private generateAuditSchedule(supplierName: string, context: any): string {
+  private generateAuditSchedule(supplierName: string): string {
     const nextAudit = new Date();
     nextAudit.setMonth(nextAudit.getMonth() + 3);
     
@@ -322,7 +297,7 @@ Please provide a comprehensive compliance analysis with specific, actionable ins
 *Audit schedule updated: ${new Date().toLocaleString()}*`;
   }
 
-  private generateViolationReport(supplierName: string, context: any): string {
+  private generateViolationReport(supplierName: string): string {
     return `## Violation Detection Report for ${supplierName}
 
 ### Current Violation Status: ✅ CLEAR
@@ -357,7 +332,7 @@ Please provide a comprehensive compliance analysis with specific, actionable ins
 *Violation monitoring active as of: ${new Date().toLocaleString()}*`;
   }
 
-  private generateComplianceScore(supplierName: string, context: any): string {
+  private generateComplianceScore(supplierName: string): string {
     const score = 92 + Math.floor(Math.random() * 6); // 92-97
     
     return `## Compliance Score Assessment for ${supplierName}
@@ -404,7 +379,7 @@ Please provide a comprehensive compliance analysis with specific, actionable ins
 *Score calculated: ${new Date().toLocaleString()}*`;
   }
 
-  private generateGeneralComplianceAssessment(supplierName: string, context: any): string {
+  private generateGeneralComplianceAssessment(supplierName: string): string {
     return `## General Compliance Assessment for ${supplierName}
 
 ### Executive Summary

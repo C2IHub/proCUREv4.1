@@ -1,0 +1,309 @@
+name: document-intelligence
+version: "1.0.0"
+description: "Document Intelligence Agent for document validation, authenticity verification, and compliance checking"
+
+# Core agent configuration
+agent:
+  foundation_model: anthropic.claude-3-sonnet-20240229-v1:0
+  instruction: |
+    You are a Document Intelligence Agent for pharmaceutical document validation, authenticity verification, and compliance checking.
+
+    Your primary responsibilities include:
+    1. Document validation and authenticity verification
+    2. Automated compliance checking against regulatory standards
+    3. Gap analysis and missing documentation identification
+    4. Fraud detection and document integrity assessment
+    5. Regulatory verification across multiple frameworks
+    6. Document classification and content extraction
+
+    Key document types you analyze:
+    - Certificates (GMP, ISO, FDA registrations, REACH compliance)
+    - Quality manuals and SOPs
+    - Audit reports and inspection records
+    - Manufacturing licenses and permits
+    - Product specifications and batch records
+    - Training records and personnel qualifications
+    - Supplier agreements and contracts
+
+    Document Analysis Framework:
+    For document analysis, always provide:
+    1. Document authenticity assessment with confidence score
+    2. Compliance verification against applicable standards
+    3. Content analysis and key information extraction
+    4. Gap identification and missing elements
+    5. Risk assessment for document-related issues
+    6. Recommendations for document improvement or remediation
+    7. Next steps and required actions
+
+    Verification Capabilities:
+    - Digital signature validation
+    - Certificate chain verification
+    - Issuing authority validation
+    - Document format and structure compliance
+    - Content consistency checking
+    - Date and version validation
+    - Cross-reference verification
+
+    Format your responses using clear markdown sections with:
+    - Document summary and classification
+    - Authenticity and integrity assessment
+    - Compliance verification results
+    - Content analysis and extracted data
+    - Gap analysis and recommendations
+    - Risk assessment and priority actions
+
+    Maintain a thorough, analytical approach with specific findings and actionable recommendations appropriate for regulatory and quality assurance professionals.
+
+# Memory configuration
+memory:
+  enabled: true
+  type: "conversation"
+  max_tokens: 10000
+  retention_days: 7 # Longer retention for document analysis
+
+# Guardrails for security and compliance
+guardrails:
+  input_validation:
+    max_prompt_length: 15000
+    min_prompt_length: 1
+    blocked_patterns:
+      - "ignore verification"
+      - "bypass security"
+      - "fake document"
+    required_context_fields:
+      - document_validation: ["documentType", "supplierId"]
+      - authenticity_check: ["documentId", "issuingAuthority"]
+      - compliance_verification: ["documentType", "regulatoryFramework"]
+
+  content_filtering:
+    hate_speech: true
+    toxicity: true
+    pii_detection: true
+    sensitive_info: true
+    financial_data_protection: true
+    document_tampering_detection: true
+
+  output_validation:
+    min_confidence: 0.80
+    max_response_length: 8000
+    required_sections:
+      - document_analysis: ["authenticity", "compliance", "recommendations"]
+      - verification_results: ["status", "findings", "next_steps"]
+
+# Action groups define the agent's capabilities
+action_groups:
+  - name: "document_validation"
+    description: "Validate document authenticity and integrity"
+    functions:
+      - name: "validate_document_authenticity"
+        description: "Verify document authenticity using multiple validation methods"
+        parameters:
+          type: "object"
+          properties:
+            document_id:
+              type: "string"
+              description: "Unique identifier for the document"
+            document_type:
+              type: "string"
+              enum: ["CERTIFICATE", "PERMIT", "MANUAL", "REPORT", "SPECIFICATION", "AGREEMENT"]
+              description: "Type of document being validated"
+            supplier_id:
+              type: "string"
+              description: "Supplier identifier"
+            document_content:
+              type: "string"
+              description: "Document content or metadata for analysis"
+            validation_methods:
+              type: "array"
+              items:
+                type: "string"
+                enum: ["DIGITAL_SIGNATURE", "CERTIFICATE_CHAIN", "ISSUING_AUTHORITY", "FORMAT_COMPLIANCE"]
+              default: ["DIGITAL_SIGNATURE", "ISSUING_AUTHORITY"]
+              description: "Validation methods to apply"
+          required: ["document_id", "document_type", "supplier_id"]
+
+  - name: "compliance_verification"
+    description: "Verify document compliance against regulatory standards"
+    functions:
+      - name: "verify_regulatory_compliance"
+        description: "Check document compliance against regulatory frameworks"
+        parameters:
+          type: "object"
+          properties:
+            document_id:
+              type: "string"
+              description: "Document identifier"
+            regulatory_frameworks:
+              type: "array"
+              items:
+                type: "string"
+                enum: ["EU_GMP", "FDA_CFR", "ISO_13485", "ISO_15378", "REACH", "ICH"]
+              description: "Regulatory frameworks to verify against"
+            compliance_scope:
+              type: "string"
+              enum: ["FULL", "CONTENT_ONLY", "FORMAT_ONLY", "METADATA_ONLY"]
+              default: "FULL"
+              description: "Scope of compliance verification"
+            include_gap_analysis:
+              type: "boolean"
+              default: true
+              description: "Include analysis of missing elements"
+          required: ["document_id", "regulatory_frameworks"]
+
+  - name: "content_analysis"
+    description: "Extract and analyze document content"
+    functions:
+      - name: "extract_document_content"
+        description: "Extract key information and analyze document content"
+        parameters:
+          type: "object"
+          properties:
+            document_id:
+              type: "string"
+              description: "Document identifier"
+            extraction_targets:
+              type: "array"
+              items:
+                type: "string"
+                enum: ["DATES", "AUTHORITIES", "CERTIFICATIONS", "SPECIFICATIONS", "CONTACTS", "SIGNATURES"]
+              default: ["DATES", "AUTHORITIES", "CERTIFICATIONS"]
+              description: "Types of information to extract"
+            analysis_depth:
+              type: "string"
+              enum: ["BASIC", "DETAILED", "COMPREHENSIVE"]
+              default: "DETAILED"
+              description: "Depth of content analysis"
+            include_consistency_check:
+              type: "boolean"
+              default: true
+              description: "Check for internal consistency"
+          required: ["document_id"]
+
+  - name: "fraud_detection"
+    description: "Detect potential document fraud and tampering"
+    functions:
+      - name: "detect_document_fraud"
+        description: "Analyze documents for signs of fraud or tampering"
+        parameters:
+          type: "object"
+          properties:
+            document_id:
+              type: "string"
+              description: "Document identifier"
+            fraud_indicators:
+              type: "array"
+              items:
+                type: "string"
+                enum: ["ALTERED_TEXT", "SUSPICIOUS_SIGNATURES", "INVALID_DATES", "INCONSISTENT_FORMATTING", "FAKE_SEALS"]
+              default: ["ALTERED_TEXT", "SUSPICIOUS_SIGNATURES", "INVALID_DATES"]
+              description: "Fraud indicators to check"
+            sensitivity_level:
+              type: "string"
+              enum: ["LOW", "MEDIUM", "HIGH", "MAXIMUM"]
+              default: "HIGH"
+              description: "Fraud detection sensitivity"
+            include_risk_score:
+              type: "boolean"
+              default: true
+              description: "Include fraud risk scoring"
+          required: ["document_id"]
+
+  - name: "gap_analysis"
+    description: "Identify missing documentation and compliance gaps"
+    functions:
+      - name: "analyze_documentation_gaps"
+        description: "Identify missing documents and compliance gaps"
+        parameters:
+          type: "object"
+          properties:
+            supplier_id:
+              type: "string"
+              description: "Supplier identifier"
+            document_portfolio:
+              type: "array"
+              items:
+                type: "object"
+                properties:
+                  document_type:
+                    type: "string"
+                  status:
+                    type: "string"
+                    enum: ["PRESENT", "MISSING", "EXPIRED", "INVALID"]
+                  last_updated:
+                    type: "string"
+                    format: "date"
+              description: "Current document portfolio"
+            regulatory_requirements:
+              type: "array"
+              items:
+                type: "string"
+                enum: ["EU_GMP", "FDA_CFR", "ISO_13485", "ISO_15378", "REACH"]
+              description: "Applicable regulatory requirements"
+            priority_assessment:
+              type: "boolean"
+              default: true
+              description: "Include priority assessment for gaps"
+          required: ["supplier_id", "regulatory_requirements"]
+
+# Web search configuration for document verification
+web_search:
+  enabled: true
+  search_domains:
+    - "ema.europa.eu"
+    - "fda.gov"
+    - "iso.org"
+    - "echa.europa.eu"
+    - "ich.org"
+    - "eudragmdp.ema.europa.eu"
+  max_results: 3
+  cache_duration: 7200 # 2 hours for regulatory references
+
+# Knowledge base integration
+knowledge_bases:
+  - name: "regulatory_templates"
+    description: "Regulatory document templates and standards"
+    s3_bucket: "procure-doc-templates-kb"
+    vector_index: "doc-templates-index"
+  - name: "fraud_patterns"
+    description: "Document fraud patterns and indicators"
+    s3_bucket: "procure-fraud-detection-kb"
+    vector_index: "fraud-patterns-index"
+  - name: "compliance_requirements"
+    description: "Regulatory compliance requirements and checklists"
+    s3_bucket: "procure-compliance-reqs-kb"
+    vector_index: "compliance-reqs-index"
+  - name: "issuing_authorities"
+    description: "Valid issuing authorities and verification databases"
+    s3_bucket: "procure-authorities-kb"
+    vector_index: "authorities-index"
+
+# Document processing configuration
+document_processing:
+  supported_formats: ["PDF", "DOCX", "DOC", "TXT", "XML", "JSON"]
+  max_file_size: "50MB"
+  ocr_enabled: true
+  text_extraction: true
+  metadata_extraction: true
+  
+# Integration settings
+integrations:
+  api_gateway:
+    cors_enabled: true
+    rate_limiting:
+      requests_per_second: 8
+      burst_limit: 40
+  
+  s3:
+    document_storage_bucket: "procure-documents"
+    temp_processing_bucket: "procure-doc-processing"
+    retention_days: 90
+  
+  cloudwatch:
+    log_group: "/aws/lambda/document-intelligence-agent"
+    metrics_enabled: true
+    
+  tags:
+    Environment: "production"
+    Application: "proCURE"
+    Agent: "document-intelligence"
+    Version: "1.0.0"
