@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Send, Sparkles, Brain, Loader, X, Minimize2, Maximize2 } from 'lucide-react';
+import { MessageSquare, Send, Sparkles, Brain, Loader, X, Minimize2, Maximize2, MessageCircle } from 'lucide-react';
 import { useComplianceAgent, useRiskAgent, useDocumentAgent } from '../context/BedrockAgentProvider';
 
 interface AgenticInterfaceProps {
   context: string; // e.g., 'compliance', 'risk', 'rfp', 'supplier', 'audit'
   contextData?: any; // Additional context data like supplier info, RFP data, etc.
   suggestedQuestions?: string[];
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
 interface ChatMessage {
@@ -19,9 +21,10 @@ interface ChatMessage {
 export default function AgenticInterface({ 
   context, 
   contextData, 
-  suggestedQuestions = []
+  suggestedQuestions = [],
+  isOpen,
+  onToggle
 }: AgenticInterfaceProps) {
-  const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -201,13 +204,13 @@ export default function AgenticInterface({
   };
 
   return (
-    <div className={`fixed right-0 top-0 h-full bg-white border-l border-gray-200 shadow-lg z-40 transition-all duration-300 ${
-      isMinimized ? 'w-16' : 'w-120'
+    <div className={`h-full bg-white border-l border-gray-200 shadow-lg transition-all duration-300 ${
+      isOpen ? 'w-[320px] lg:w-[400px]' : 'w-12'
     }`}>
       {/* Header */}
       <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-purple-100">
         <div className="flex items-center justify-between">
-          {!isMinimized && (
+          {isOpen && (
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg mr-3">
                 <Brain className="h-5 w-5 text-purple-600" />
@@ -222,27 +225,27 @@ export default function AgenticInterface({
             </div>
           )}
           <div className="flex items-center space-x-2">
-            {!isMinimized && (
+            {isOpen && (
               <div className="flex items-center text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
                 <Sparkles className="h-3 w-3 mr-1" />
                 <span>AI Powered</span>
               </div>
             )}
             <button
-              onClick={() => setIsMinimized(!isMinimized)}
+              onClick={onToggle}
               className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
             >
-              {isMinimized ? (
-                <Maximize2 className="h-4 w-4" />
-              ) : (
+              {isOpen ? (
                 <Minimize2 className="h-4 w-4" />
+              ) : (
+                <MessageCircle className="h-4 w-4" />
               )}
             </button>
           </div>
         </div>
       </div>
 
-      {!isMinimized && (
+      {isOpen && (
         <>
           {/* Quick Questions */}
           <div className="p-4 border-b border-gray-200 bg-gray-50">
@@ -333,7 +336,7 @@ export default function AgenticInterface({
       )}
 
       {/* Minimized State */}
-      {isMinimized && (
+      {!isOpen && (
         <div className="p-4 text-center">
           <Brain className="h-8 w-8 text-purple-600 mx-auto mb-2" />
           <p className="text-xs text-gray-500 transform -rotate-90 whitespace-nowrap">proCURE AI</p>

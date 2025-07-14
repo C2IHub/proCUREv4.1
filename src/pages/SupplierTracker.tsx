@@ -93,7 +93,7 @@ const SupplierTracker: React.FC = () => {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-4 md:p-8 space-y-4 md:space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -103,7 +103,7 @@ const SupplierTracker: React.FC = () => {
       </div>
 
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center">
             <Building2 className="h-8 w-8 text-blue-600" />
@@ -146,9 +146,9 @@ const SupplierTracker: React.FC = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex items-center space-x-4">
-          <div className="flex-1 relative">
+      <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <input
               type="text"
@@ -163,16 +163,16 @@ const SupplierTracker: React.FC = () => {
 
       {/* Selected Supplier Actions - Moved to Top */}
       {selectedSupplier && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-4 md:mb-6">
           <div className="p-4 bg-gray-50 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-medium text-gray-900">
                   Selected: {suppliers.find(s => s.id === selectedSupplier)?.name}
                 </h3>
                 <p className="text-xs text-gray-600">Choose an action for this supplier</p>
               </div>
-              <div className="flex space-x-3">
+              <div className="flex flex-wrap gap-2">
                 <button 
                   onClick={handleViewPortal}
                   className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
@@ -194,8 +194,8 @@ const SupplierTracker: React.FC = () => {
       )}
 
       {/* Suppliers Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="overflow-x-auto w-full">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -231,7 +231,7 @@ const SupplierTracker: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{supplier.name}</div>
-                      <div className="text-sm text-gray-500">{supplier.category}</div>
+                      <div className="text-sm text-gray-500 truncate max-w-[150px]">{supplier.category}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -248,7 +248,8 @@ const SupplierTracker: React.FC = () => {
                     {supplier.certifications.length} certifications
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(supplier.lastAudit).toLocaleDateString()}
+                    <span className="hidden sm:inline">{new Date(supplier.lastAudit).toLocaleDateString()}</span>
+                    <span className="sm:hidden">{new Date(supplier.lastAudit).toLocaleDateString('en-US', {month: 'short', day: 'numeric'})}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full capitalize ${getStatusColor(supplier.supplierRating)}`}>

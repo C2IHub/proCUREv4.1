@@ -17,6 +17,7 @@ import { StrandsSystemProvider } from './context/StrandsSystemProvider';
 import { SupplierProvider } from './hooks/useSupplierContext';
 
 // Create a client for React Query
+// Create a client for React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -33,6 +34,8 @@ function App() {
     role: 'Compliance Manager',
     avatar: 'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2'
   });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -40,9 +43,15 @@ function App() {
         <BedrockAgentProvider>
           <SupplierProvider>
             <Router>
-              <div className="min-h-screen bg-gray-50">
-                <Navigation currentUser={currentUser} />
-                <main className="pl-64 pr-120">
+              <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+                <Navigation 
+                  currentUser={currentUser} 
+                  isOpen={sidebarOpen} 
+                  onToggle={() => setSidebarOpen(!sidebarOpen)} 
+                />
+                <main className={`flex-1 transition-all duration-300 ${
+                  aiPanelOpen ? 'md:pr-[320px] lg:pr-[400px]' : ''
+                }`}>
                   <Routes>
                     <Route path="/" element={<RiskComplianceDashboard />} />
                     <Route path="/supplier-tracker" element={<SupplierTracker />} />
@@ -56,62 +65,84 @@ function App() {
                     <Route path="/supplier/:id/portal" element={<SupplierPortal />} />
                   </Routes>
                 </main>
-                <Routes>
-                  <Route path="/" element={
-                    <AgenticInterface 
-                      context="compliance"
-                      contextData={{}}
-                    />
-                  } />
-                  <Route path="/supplier-tracker" element={
-                    <AgenticInterface 
-                      context="supplier"
-                      contextData={{}}
-                    />
-                  } />
-                  <Route path="/rfp-wizard" element={
-                    <AgenticInterface 
-                      context="rfp"
-                      contextData={{}}
-                    />
-                  } />
-                  <Route path="/rfp-tracker" element={
-                    <AgenticInterface 
-                      context="tracker"
-                      contextData={{}}
-                    />
-                  } />
-                  <Route path="/audit-trail" element={
-                    <AgenticInterface 
-                      context="audit"
-                      contextData={{}}
-                    />
-                  } />
-                  <Route path="/workflows" element={
-                    <AgenticInterface 
-                      context="workflow"
-                      contextData={{}}
-                    />
-                  } />
-                  <Route path="/settings" element={
-                    <AgenticInterface 
-                      context="compliance"
-                      contextData={{}}
-                    />
-                  } />
-                  <Route path="/supplier/:id/reasoning" element={
-                    <AgenticInterface 
-                      context="supplier"
-                      contextData={{}}
-                    />
-                  } />
-                  <Route path="/supplier/:id/portal" element={
-                    <AgenticInterface 
-                      context="portal"
-                      contextData={{}}
-                    />
-                  } />
-                </Routes>
+                <div className={`fixed right-0 top-0 z-40 transition-all duration-300 ${
+                  aiPanelOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0 md:w-12'
+                }`}>
+                  <Routes>
+                    <Route path="/" element={
+                      <AgenticInterface 
+                        context="compliance"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => setAiPanelOpen(!aiPanelOpen)}
+                      />
+                    } />
+                    <Route path="/supplier-tracker" element={
+                      <AgenticInterface 
+                        context="supplier"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => setAiPanelOpen(!aiPanelOpen)}
+                      />
+                    } />
+                    <Route path="/rfp-wizard" element={
+                      <AgenticInterface 
+                        context="rfp"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => setAiPanelOpen(!aiPanelOpen)}
+                      />
+                    } />
+                    <Route path="/rfp-tracker" element={
+                      <AgenticInterface 
+                        context="tracker"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => setAiPanelOpen(!aiPanelOpen)}
+                      />
+                    } />
+                    <Route path="/audit-trail" element={
+                      <AgenticInterface 
+                        context="audit"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => setAiPanelOpen(!aiPanelOpen)}
+                      />
+                    } />
+                    <Route path="/workflows" element={
+                      <AgenticInterface 
+                        context="workflow"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => setAiPanelOpen(!aiPanelOpen)}
+                      />
+                    } />
+                    <Route path="/settings" element={
+                      <AgenticInterface 
+                        context="compliance"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => setAiPanelOpen(!aiPanelOpen)}
+                      />
+                    } />
+                    <Route path="/supplier/:id/reasoning" element={
+                      <AgenticInterface 
+                        context="supplier"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => setAiPanelOpen(!aiPanelOpen)}
+                      />
+                    } />
+                    <Route path="/supplier/:id/portal" element={
+                      <AgenticInterface 
+                        context="portal"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => setAiPanelOpen(!aiPanelOpen)}
+                      />
+                    } />
+                  </Routes>
+                </div>
               </div>
             </Router>
           </SupplierProvider>

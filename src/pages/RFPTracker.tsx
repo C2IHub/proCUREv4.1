@@ -224,7 +224,7 @@ export default function RFPTracker() {
   }, []);
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* RFP Details View */}
       {currentView === 'details' && selectedRFPData && (
         <div className="space-y-6">
@@ -245,7 +245,7 @@ export default function RFPTracker() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
             <div className="space-y-6">
               {/* Basic Info */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
                   <div className="space-y-3">
@@ -305,7 +305,7 @@ export default function RFPTracker() {
               {/* Response Statistics */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Response Statistics</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <div className="text-2xl font-bold text-blue-600">{selectedRFPData.suppliersInvited}</div>
                     <div className="text-sm text-blue-600">Suppliers Invited</div>
@@ -456,15 +456,15 @@ export default function RFPTracker() {
       {/* Header */}
       {currentView === 'list' && (
         <>
-          <div className="mb-6">
-        <div className="flex items-center justify-between">
+          <div className="mb-4 md:mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">RFP Tracker</h1>
             <p className="text-gray-600">Monitor and manage all RFP processes from creation to award</p>
           </div>
           <button 
             onClick={() => navigate('/rfp-wizard')}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium w-full sm:w-auto justify-center sm:justify-start"
           >
             <Plus className="h-4 w-4 mr-2" />
             Create New RFP
@@ -473,7 +473,7 @@ export default function RFPTracker() {
       </div>
 
       {/* Summary Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div className="p-2 bg-blue-50 rounded-lg">
@@ -540,9 +540,9 @@ export default function RFPTracker() {
       </div>
 
       {/* Search */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <div className="flex items-center space-x-4">
-          <div className="flex-1 relative">
+      <div className="bg-white p-4 md:p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <input
               type="text"
@@ -557,16 +557,16 @@ export default function RFPTracker() {
 
       {/* Selected RFP Actions */}
       {selectedRFP && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-4 md:mb-6">
           <div className="p-4 bg-gray-50 border-b border-gray-200">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-medium text-gray-900">
                   Selected: {rfps.find(r => r.id === selectedRFP)?.title}
                 </h3>
                 <p className="text-xs text-gray-600">Choose an action for this RFP</p>
               </div>
-              <div className="flex space-x-3">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={handleViewDetails}
                   className="flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
@@ -595,8 +595,8 @@ export default function RFPTracker() {
       )}
 
       {/* RFP Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="overflow-x-auto w-full">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -625,7 +625,7 @@ export default function RFPTracker() {
                         <div>
                           <div className="text-sm font-medium text-gray-900">{rfp.title}</div>
                           <div className="text-sm text-gray-500">{rfp.id}</div>
-                          <div className="flex flex-wrap gap-1 mt-1">
+                          <div className="flex flex-wrap gap-1 mt-1 max-w-[200px]">
                             {rfp.categories.slice(0, 2).map((category, index) => (
                               <span key={index} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded">
                                 {category}
@@ -648,7 +648,7 @@ export default function RFPTracker() {
                               style={{ width: `${rfp.progress}%` }}
                             ></div>
                           </div>
-                          <span className="text-sm text-gray-900">{rfp.progress}%</span>
+                          <span className="text-sm text-gray-900 whitespace-nowrap">{rfp.progress}%</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -657,7 +657,7 @@ export default function RFPTracker() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="text-sm text-gray-900">{new Date(rfp.deadline).toLocaleDateString()}</div>
-                        <div className={`text-xs ${
+                        <div className={`text-xs whitespace-nowrap ${
                           daysUntilDeadline < 0 ? 'text-red-600' :
                           daysUntilDeadline < 7 ? 'text-yellow-600' : 'text-gray-500'
                         }`}>
@@ -665,7 +665,7 @@ export default function RFPTracker() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-900">{rfp.budget}</div>
+                        <div className="text-sm text-gray-900 whitespace-nowrap">{rfp.budget}</div>
                       </td>
                     </tr>
                   );
@@ -676,7 +676,7 @@ export default function RFPTracker() {
       </div>
 
       {filteredRFPs.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-8 md:py-12">
           <div className="text-gray-400 mb-4">
             <FileText className="h-12 w-12 mx-auto" />
           </div>

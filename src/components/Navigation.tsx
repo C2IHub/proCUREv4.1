@@ -10,7 +10,9 @@ import {
   Settings,
   LogOut,
   History,
-  Workflow
+  Workflow,
+  Menu,
+  X
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -19,9 +21,11 @@ interface NavigationProps {
     role: string;
     avatar: string;
   };
+  isOpen: boolean;
+  onToggle: () => void;
 }
 
-export default function Navigation({ currentUser }: NavigationProps) {
+export default function Navigation({ currentUser, isOpen, onToggle }: NavigationProps) {
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
@@ -78,7 +82,26 @@ export default function Navigation({ currentUser }: NavigationProps) {
   };
 
   return (
-    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200">
+    <>
+      {/* Mobile menu button */}
+      <button 
+        onClick={onToggle}
+        className="fixed top-4 left-4 z-50 md:hidden bg-white p-2 rounded-md shadow-md border border-gray-200"
+      >
+        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+      </button>
+      
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={onToggle}
+        />
+      )}
+      
+      <div className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 transition-all duration-300 ${
+        isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      } md:w-64 w-3/4`}>
       {/* Logo */}
       <div className="flex items-center px-6 py-4 border-b border-gray-200">
         <div className="flex items-center">
@@ -131,5 +154,6 @@ export default function Navigation({ currentUser }: NavigationProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }
