@@ -67,6 +67,16 @@ const mockWorkflows: WorkflowDefinition[] = [
   }
 ];
 
+// Mock supplier data for testing workflows
+const mockSupplierData = {
+  supplier: {
+    name: 'Global Pharma Solutions',
+    region: 'North America',
+    category: 'Pharmaceutical',
+    regulatoryStandard: 'FDA 21 CFR Part 820'
+  }
+};
+
 const WorkflowDashboard: React.FC = () => {
   const [activeWorkflows, setActiveWorkflows] = useState<WorkflowExecution[]>([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState<string>('supplier-onboarding');
