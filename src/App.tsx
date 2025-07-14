@@ -33,7 +33,7 @@ function App() {
     role: 'Compliance Manager',
     avatar: 'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2'
   });
-  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   // Close sidebar on small screens when route changes
@@ -53,9 +53,26 @@ function App() {
                 <Navigation 
                   currentUser={currentUser} 
                   isOpen={sidebarOpen} 
-                  onToggle={() => setSidebarOpen(!sidebarOpen)} 
+                  onToggle={() => {
+                    setSidebarOpen(!sidebarOpen);
+                    // Close AI panel when opening sidebar on mobile
+                    if (window.innerWidth < 768 && !sidebarOpen) {
+                      setAiPanelOpen(false);
+                    }
+                  }} 
                 />
-                <div className="flex flex-1 relative">
+                <div className="flex-1 flex relative">
+                  {/* Overlay for mobile when sidebar or AI panel is open */}
+                  {(sidebarOpen || aiPanelOpen) && (
+                    <div 
+                      className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+                      onClick={() => {
+                        setSidebarOpen(false);
+                        setAiPanelOpen(false);
+                      }}
+                    />
+                  )}
+                  
                   <main className={`flex-1 transition-all duration-300 ${
                     sidebarOpen ? 'md:ml-64' : ''
                   } ${
@@ -74,84 +91,128 @@ function App() {
                       <Route path="/supplier/:id/portal" element={<SupplierPortal />} />
                     </Routes>
                   </main>
-                  <div className={`fixed right-0 top-0 h-full z-40 transition-all duration-300 ${
-                    aiPanelOpen ? 'translate-x-0 w-full sm:w-[320px] lg:w-[400px]' : 'translate-x-full md:translate-x-0 md:w-12'
-                  }`}>
-                    <Routes>
-                      <Route path="/" element={
-                        <AgenticInterface 
-                          context="compliance"
-                          contextData={{}}
-                          isOpen={aiPanelOpen}
-                          onToggle={() => setAiPanelOpen(!aiPanelOpen)}
-                        />
-                      } />
-                      <Route path="/supplier-tracker" element={
-                        <AgenticInterface 
-                          context="supplier"
-                          contextData={{}}
-                          isOpen={aiPanelOpen}
-                          onToggle={() => setAiPanelOpen(!aiPanelOpen)}
-                        />
-                      } />
-                      <Route path="/rfp-wizard" element={
-                        <AgenticInterface 
-                          context="rfp"
-                          contextData={{}}
-                          isOpen={aiPanelOpen}
-                          onToggle={() => setAiPanelOpen(!aiPanelOpen)}
-                        />
-                      } />
-                      <Route path="/rfp-tracker" element={
-                        <AgenticInterface 
-                          context="tracker"
-                          contextData={{}}
-                          isOpen={aiPanelOpen}
-                          onToggle={() => setAiPanelOpen(!aiPanelOpen)}
-                        />
-                      } />
-                      <Route path="/audit-trail" element={
-                        <AgenticInterface 
-                          context="audit"
-                          contextData={{}}
-                          isOpen={aiPanelOpen}
-                          onToggle={() => setAiPanelOpen(!aiPanelOpen)}
-                        />
-                      } />
-                      <Route path="/workflows" element={
-                        <AgenticInterface 
-                          context="workflow"
-                          contextData={{}}
-                          isOpen={aiPanelOpen}
-                          onToggle={() => setAiPanelOpen(!aiPanelOpen)}
-                        />
-                      } />
-                      <Route path="/settings" element={
-                        <AgenticInterface 
-                          context="compliance"
-                          contextData={{}}
-                          isOpen={aiPanelOpen}
-                          onToggle={() => setAiPanelOpen(!aiPanelOpen)}
-                        />
-                      } />
-                      <Route path="/supplier/:id/reasoning" element={
-                        <AgenticInterface 
-                          context="supplier"
-                          contextData={{}}
-                          isOpen={aiPanelOpen}
-                          onToggle={() => setAiPanelOpen(!aiPanelOpen)}
-                        />
-                      } />
-                      <Route path="/supplier/:id/portal" element={
-                        <AgenticInterface 
-                          context="portal"
-                          contextData={{}}
-                          isOpen={aiPanelOpen}
-                          onToggle={() => setAiPanelOpen(!aiPanelOpen)}
-                        />
-                      } />
-                    </Routes>
-                  </div>
+                  
+                  {/* AI Assistant Panel - Fixed position */}
+                  <Routes>
+                    <Route path="/" element={
+                      <AgenticInterface 
+                        context="compliance"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => {
+                          setAiPanelOpen(!aiPanelOpen);
+                          // Close sidebar when opening AI panel on mobile
+                          if (window.innerWidth < 768 && !aiPanelOpen) {
+                            setSidebarOpen(false);
+                          }
+                        }}
+                      />
+                    } />
+                    <Route path="/supplier-tracker" element={
+                      <AgenticInterface 
+                        context="supplier"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => {
+                          setAiPanelOpen(!aiPanelOpen);
+                          if (window.innerWidth < 768 && !aiPanelOpen) {
+                            setSidebarOpen(false);
+                          }
+                        }}
+                      />
+                    } />
+                    <Route path="/rfp-wizard" element={
+                      <AgenticInterface 
+                        context="rfp"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => {
+                          setAiPanelOpen(!aiPanelOpen);
+                          if (window.innerWidth < 768 && !aiPanelOpen) {
+                            setSidebarOpen(false);
+                          }
+                        }}
+                      />
+                    } />
+                    <Route path="/rfp-tracker" element={
+                      <AgenticInterface 
+                        context="tracker"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => {
+                          setAiPanelOpen(!aiPanelOpen);
+                          if (window.innerWidth < 768 && !aiPanelOpen) {
+                            setSidebarOpen(false);
+                          }
+                        }}
+                      />
+                    } />
+                    <Route path="/audit-trail" element={
+                      <AgenticInterface 
+                        context="audit"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => {
+                          setAiPanelOpen(!aiPanelOpen);
+                          if (window.innerWidth < 768 && !aiPanelOpen) {
+                            setSidebarOpen(false);
+                          }
+                        }}
+                      />
+                    } />
+                    <Route path="/workflows" element={
+                      <AgenticInterface 
+                        context="workflow"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => {
+                          setAiPanelOpen(!aiPanelOpen);
+                          if (window.innerWidth < 768 && !aiPanelOpen) {
+                            setSidebarOpen(false);
+                          }
+                        }}
+                      />
+                    } />
+                    <Route path="/settings" element={
+                      <AgenticInterface 
+                        context="compliance"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => {
+                          setAiPanelOpen(!aiPanelOpen);
+                          if (window.innerWidth < 768 && !aiPanelOpen) {
+                            setSidebarOpen(false);
+                          }
+                        }}
+                      />
+                    } />
+                    <Route path="/supplier/:id/reasoning" element={
+                      <AgenticInterface 
+                        context="supplier"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => {
+                          setAiPanelOpen(!aiPanelOpen);
+                          if (window.innerWidth < 768 && !aiPanelOpen) {
+                            setSidebarOpen(false);
+                          }
+                        }}
+                      />
+                    } />
+                    <Route path="/supplier/:id/portal" element={
+                      <AgenticInterface 
+                        context="portal"
+                        contextData={{}}
+                        isOpen={aiPanelOpen}
+                        onToggle={() => {
+                          setAiPanelOpen(!aiPanelOpen);
+                          if (window.innerWidth < 768 && !aiPanelOpen) {
+                            setSidebarOpen(false);
+                          }
+                        }}
+                      />
+                    } />
+                  </Routes>
                 </div>
               </div>
             </Router>

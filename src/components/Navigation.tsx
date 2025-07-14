@@ -85,12 +85,19 @@ export default function Navigation({ currentUser, isOpen, onToggle }: Navigation
   return (
     <>
       {/* Mobile menu button */}
-      <button
-        onClick={onToggle}
-        className="fixed top-4 left-4 z-50 md:hidden bg-white p-2 rounded-md shadow-md border border-gray-200"
-      >
-        {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </button>
+      <div className="fixed top-0 left-0 right-0 z-40 md:hidden flex items-center justify-between bg-white p-3 border-b border-gray-200 shadow-sm">
+        <button
+          onClick={onToggle}
+          className="p-2 rounded-md hover:bg-gray-100"
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+        <div className="flex items-center">
+          <Shield className="h-6 w-6 text-blue-600" />
+          <span className="ml-2 font-semibold text-gray-900">proCURE</span>
+        </div>
+        <div className="w-10"></div> {/* Spacer for balance */}
+      </div>
       
       {/* Overlay for mobile */}
       {isOpen && (
@@ -102,7 +109,7 @@ export default function Navigation({ currentUser, isOpen, onToggle }: Navigation
       
       <div className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-gray-200 transition-all duration-300 overflow-y-auto ${
         isOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-64 w-3/4'
-      } md:w-64 w-3/4`}>
+      } md:w-64 w-3/4 ${window.innerWidth < 768 ? 'pt-14' : ''}`}>
       {/* Logo */}
       <div className="flex items-center px-6 py-4 border-b border-gray-200">
         <div className="flex items-center">
@@ -120,7 +127,7 @@ export default function Navigation({ currentUser, isOpen, onToggle }: Navigation
       </nav>
 
       {/* User Profile */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+      <div className="sticky bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-white">
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}

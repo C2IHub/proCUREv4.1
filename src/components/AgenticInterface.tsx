@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, Sparkles, Brain, Loader, X, Minimize2, Maximize2, MessageCircle } from 'lucide-react';
 import { useComplianceAgent, useRiskAgent, useDocumentAgent } from '../context/BedrockAgentProvider';
+import { useLocation } from 'react-router-dom';
 
 interface AgenticInterfaceProps {
   context: string; // e.g., 'compliance', 'risk', 'rfp', 'supplier', 'audit'
@@ -29,10 +30,16 @@ export default function AgenticInterface({
   const [inputValue, setInputValue] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   const complianceAgent = useComplianceAgent();
   const riskAgent = useRiskAgent();
   const documentAgent = useDocumentAgent();
+  
+  // Reset messages when route changes
+  useEffect(() => {
+    setMessages([]);
+  }, [location.pathname]);
 
   // Auto-scroll to bottom when new messages are added
   const scrollToBottom = () => {
@@ -204,11 +211,11 @@ export default function AgenticInterface({
   };
 
   return (
-    <div className={`h-full bg-white border-l border-gray-200 shadow-lg transition-all duration-300 flex flex-col ${
-      isOpen ? 'w-full sm:w-[320px] lg:w-[400px]' : 'w-12'
+    <div className={`fixed top-0 right-0 h-full bg-white border-l border-gray-200 shadow-lg transition-all duration-300 flex flex-col z-40 ${
+      isOpen ? 'w-full sm:w-[320px] lg:w-[400px]' : 'w-0 md:w-12'
     }`}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-purple-100">
+      <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-purple-100 flex-shrink-0">
         <div className="flex items-center justify-between">
           {isOpen && (
             <div className="flex items-center">
@@ -227,7 +234,7 @@ export default function AgenticInterface({
           <div className="flex items-center space-x-2">
             {isOpen && (
               <div className="flex items-center text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
-                <Sparkles className="h-3 w-3 mr-1" />
+                <Sparkles className="h-3 w-3 mr-1 flex-shrink-0" />
                 <span>AI Powered</span>
               </div>
             )}
@@ -248,7 +255,7 @@ export default function AgenticInterface({
       {isOpen && (
         <>
           {/* Quick Questions */}
-          <div className="p-4 border-b border-gray-200 bg-gray-50">
+          <div className="p-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
             <h4 className="text-sm font-medium text-gray-700 mb-3">Quick Questions</h4>
             <div className="space-y-2">
               {questions.slice(0, 4).map((question, index) => (
@@ -266,8 +273,7 @@ export default function AgenticInterface({
 
           {/* Chat Messages */}
           <div 
-            className="flex-1 overflow-y-auto p-4 space-y-4" 
-            style={{ height: 'calc(100vh - 320px)', minHeight: '200px' }}
+            className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0" 
             id="messages-container"
           >
             {messages.length === 0 && (
@@ -303,7 +309,7 @@ export default function AgenticInterface({
           </div>
 
           {/* Input Area */}
-          <div className="p-4 border-t border-gray-200 bg-white sticky bottom-0 mt-auto">
+          <div className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
             <div className="flex space-x-2">
               <div className="flex-1 relative">
                 <textarea
@@ -313,7 +319,7 @@ export default function AgenticInterface({
                   placeholder="Ask me anything..."
                   className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-sm max-h-20"
                   rows={1}
-                  disabled={isProcessing}
+                  disabled={isProcessing || !isOpen}
                 />
               </div>
               <button
@@ -337,7 +343,7 @@ export default function AgenticInterface({
 
       {/* Minimized State */}
       {!isOpen && (
-        <div className="p-4 text-center">
+        <div className="p-4 text-center hidden md:block">
           <Brain className="h-6 w-6 text-purple-600 mx-auto mb-2" />
           <p className="text-xs text-gray-500 transform -rotate-90 whitespace-nowrap hidden md:block">proCURE AI</p>
         </div>
