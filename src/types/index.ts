@@ -200,6 +200,147 @@ export interface AgentInvokeResponse {
   sources?: string[];
 }
 
+// Enhanced Agent System Types
+export type AgentId = string;
+
+export interface BaseAgentCapabilities {
+  id: AgentId;
+  name: string;
+  description: string;
+  capabilities: string[];
+  dependencies?: AgentId[];
+  version: string;
+}
+
+export interface AgentConfig {
+  enabled: boolean;
+  maxConcurrency: number;
+  timeout: number;
+  retryAttempts: number;
+  rateLimits: {
+    requestsPerMinute: number;
+    requestsPerHour: number;
+  };
+  features: Record<string, boolean>;
+}
+
+export interface AgentExecutionContext {
+  sessionId: string;
+  userId: string;
+  requestId: string;
+  timestamp: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+export interface WorkflowDefinition {
+  id: string;
+  name: string;
+  description: string;
+  version: string;
+  steps: WorkflowStep[];
+  coordination: 'sequential' | 'parallel' | 'conditional' | 'event-driven';
+  maxDuration: number;
+  retryPolicy: {
+    maxRetries: number;
+    backoffMultiplier: number;
+  };
+}
+
+export interface WorkflowStep {
+  id: string;
+  agentId: AgentId;
+  name: string;
+  description: string;
+  inputs: Record<string, unknown>;
+  outputs?: string[];
+  conditions?: WorkflowCondition[];
+  dependencies?: string[];
+  timeout: number;
+}
+
+export interface WorkflowCondition {
+  field: string;
+  operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains';
+  value: unknown;
+}
+
+export interface WorkflowExecution {
+  id: string;
+  workflowId: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  startTime: string;
+  endTime?: string;
+  context: AgentExecutionContext;
+  stepResults: WorkflowStepResult[];
+  error?: string;
+}
+
+export interface WorkflowStepResult {
+  stepId: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
+  startTime: string;
+  endTime?: string;
+  result?: AgentInvokeResponse;
+  error?: string;
+}
+
+export interface DependencyValidationResult {
+  isValid: boolean;
+  missingDependencies: AgentId[];
+  circularDependencies: AgentId[][];
+}
+
+export interface AgentHealth {
+  agentId: AgentId;
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  lastCheck: string;
+  responseTime: number;
+  errorRate: number;
+  uptime: number;
+}
+
+export interface PerformanceMetrics {
+  agentId: AgentId;
+  responseTime: {
+    p50: number;
+    p95: number;
+    p99: number;
+  };
+  throughput: number;
+  errorRate: number;
+  successRate: number;
+  tokenUsage: number;
+  cost: number;
+  period: string;
+}
+
+export interface AgentMemoryEntry {
+  key: string;
+  value: unknown;
+  timestamp: string;
+  ttl?: number;
+  compressed?: boolean;
+}
+
+export interface SecurityValidationResult {
+  passed: boolean;
+  violations: string[];
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+}
+
+export interface RateLimitResult {
+  allowed: boolean;
+  remaining: number;
+  resetTime: number;
+  retryAfter?: number;
+}
+
 // Supplier Context types
 export interface SupplierContextValue {
   currentSupplierId: string | null;

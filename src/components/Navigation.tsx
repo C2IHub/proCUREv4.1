@@ -9,7 +9,8 @@ import {
   ChevronDown,
   Settings,
   LogOut,
-  History
+  History,
+  Workflow
 } from 'lucide-react';
 
 interface NavigationProps {
@@ -42,6 +43,7 @@ export default function Navigation({ currentUser }: NavigationProps) {
     {
       title: 'System',
       items: [
+        { name: 'Workflows', href: '/workflows', icon: Workflow },
         { name: 'Audit Trail', href: '/audit-trail', icon: History },
         { name: 'Settings', href: '/settings', icon: Settings },
       ]
