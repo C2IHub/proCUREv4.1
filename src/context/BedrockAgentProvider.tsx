@@ -3,7 +3,7 @@ import { BedrockAgentConfig, AgentInvokeRequest, AgentInvokeResponse } from '../
 
 // Conditionally import AWS SDK only when Bedrock is enabled
 let BedrockAgentRuntime: any = null;
-if (typeof window === 'undefined' || process.env.BEDROCK_ENABLED === 'true') {
+if (typeof window === 'undefined' || import.meta.env.VITE_BEDROCK_ENABLED === 'true') {
   try {
     BedrockAgentRuntime = require('@aws-sdk/client-bedrock-agent-runtime').BedrockAgentRuntime;
   } catch (error) {
@@ -416,9 +416,9 @@ class RealBedrockAgent implements BedrockAgent {
   status: 'available' | 'unavailable' | 'error' = 'available';
 
   async invoke(request: AgentInvokeRequest): Promise<AgentInvokeResponse> {
-    const enableFallback = process.env.BEDROCK_FALLBACK_TO_MOCK === 'true';
-    const timeout = parseInt(process.env.BEDROCK_TIMEOUT || '60000');
-    const maxRetries = parseInt(process.env.BEDROCK_MAX_RETRIES || '3');
+    const enableFallback = import.meta.env.VITE_BEDROCK_FALLBACK_TO_MOCK === 'true';
+    const timeout = parseInt(import.meta.env.VITE_BEDROCK_TIMEOUT || '60000');
+    const maxRetries = parseInt(import.meta.env.VITE_BEDROCK_MAX_RETRIES || '3');
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -465,7 +465,7 @@ class RealBedrockAgent implements BedrockAgent {
           sources: sources
         };
 
-        if (process.env.ENABLE_DEBUG_LOGGING === 'true') {
+        if (import.meta.env.VITE_ENABLE_DEBUG_LOGGING === 'true') {
           console.log(`✅ Bedrock agent ${this.agentName} responded (attempt ${attempt}):`, {
             responseLength: completionText.length,
             confidence: agentResponse.confidence,
@@ -534,10 +534,10 @@ class RealBedrockAgent implements BedrockAgent {
 
 export function BedrockAgentProvider({ children, config }: BedrockAgentProviderProps) {
   // Check if real Bedrock should be used
-  const bedrockEnabled = process.env.BEDROCK_ENABLED === 'true';
+  const bedrockEnabled = import.meta.env.VITE_BEDROCK_ENABLED === 'true';
   const hasAwsSdk = BedrockAgentRuntime !== null;
   const hasAgentConfig = !!(config?.compliance?.agentId && config?.risk?.agentId && config?.document?.agentId);
-  const hasEnvConfig = !!(process.env.BEDROCK_COMPLIANCE_AGENT_ID && process.env.BEDROCK_RISK_AGENT_ID && process.env.BEDROCK_DOCUMENT_AGENT_ID);
+  const hasEnvConfig = !!(import.meta.env.VITE_BEDROCK_COMPLIANCE_AGENT_ID && import.meta.env.VITE_BEDROCK_RISK_AGENT_ID && import.meta.env.VITE_BEDROCK_DOCUMENT_AGENT_ID);
   
   const useRealBedrock = bedrockEnabled && hasAwsSdk && (hasAgentConfig || hasEnvConfig);
 
@@ -545,21 +545,21 @@ export function BedrockAgentProvider({ children, config }: BedrockAgentProviderP
   const getAgentConfig = (agentType: 'compliance' | 'risk' | 'document'): BedrockAgentConfig => {
     const envMap = {
       compliance: {
-        agentId: process.env.BEDROCK_COMPLIANCE_AGENT_ID,
-        agentAliasId: process.env.BEDROCK_COMPLIANCE_AGENT_ALIAS_ID || 'TSTALIASID'
+        agentId: import.meta.env.VITE_BEDROCK_COMPLIANCE_AGENT_ID,
+        agentAliasId: import.meta.env.VITE_BEDROCK_COMPLIANCE_AGENT_ALIAS_ID || 'TSTALIASID'
       },
       risk: {
-        agentId: process.env.BEDROCK_RISK_AGENT_ID,
-        agentAliasId: process.env.BEDROCK_RISK_AGENT_ALIAS_ID || 'TSTALIASID'
+        agentId: import.meta.env.VITE_BEDROCK_RISK_AGENT_ID,
+        agentAliasId: import.meta.env.VITE_BEDROCK_RISK_AGENT_ALIAS_ID || 'TSTALIASID'
       },
       document: {
-        agentId: process.env.BEDROCK_DOCUMENT_AGENT_ID,
-        agentAliasId: process.env.BEDROCK_DOCUMENT_AGENT_ALIAS_ID || 'TSTALIASID'
+        agentId: import.meta.env.VITE_BEDROCK_DOCUMENT_AGENT_ID,
+        agentAliasId: import.meta.env.VITE_BEDROCK_DOCUMENT_AGENT_ALIAS_ID || 'TSTALIASID'
       }
     };
 
     return {
-      region: config?.[agentType]?.region || process.env.AWS_REGION || 'us-east-1',
+      region: config?.[agentType]?.region || import.meta.env.VITE_AWS_REGION || 'us-east-1',
       agentId: config?.[agentType]?.agentId || envMap[agentType].agentId || `mock-${agentType}-agent`,
       agentAliasId: config?.[agentType]?.agentAliasId || envMap[agentType].agentAliasId || 'TSTALIASID'
     };
@@ -641,7 +641,7 @@ export function BedrockAgentProvider({ children, config }: BedrockAgentProviderP
     );
   }
 
-  const isConfigured = useRealBedrock || process.env.NODE_ENV === 'development';
+  const isConfigured = useRealBedrock || import.meta.env.DEV;
 
   const value: BedrockAgentContextValue = {
     complianceAgent,
