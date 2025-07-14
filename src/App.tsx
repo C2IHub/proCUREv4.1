@@ -13,7 +13,7 @@ import AuditTrail from './pages/AuditTrail';
 import Settings from './pages/Settings';
 import WorkflowDashboard from './pages/WorkflowDashboard';
 import { BedrockAgentProvider } from './context/BedrockAgentProvider';
-import { AgentSystemProvider } from './context/AgentSystemProvider';
+import { StrandsSystemProvider } from './context/StrandsSystemProvider';
 import { SupplierProvider } from './hooks/useSupplierContext';
 
 // Create a client for React Query
@@ -36,7 +36,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AgentSystemProvider>
+      <StrandsSystemProvider>
         <BedrockAgentProvider>
           <SupplierProvider>
             <Router>
@@ -116,7 +116,7 @@ function App() {
             </Router>
           </SupplierProvider>
         </BedrockAgentProvider>
-      </AgentSystemProvider>
+      </StrandsSystemProvider>
     </QueryClientProvider>
   );
 }

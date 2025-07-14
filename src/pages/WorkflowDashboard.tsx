@@ -1,96 +1,170 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, Clock, CheckCircle, XCircle, AlertTriangle, Activity, Users, Workflow } from 'lucide-react';
-import { useAgentSystem, useAgentHealth, useAgentCapabilities } from '../context/AgentSystemProvider';
-import { SupplierOnboardingWorkflow, ComplianceReviewWorkflow, getWorkflowById } from '../agents/workflows/SupplierOnboardingWorkflow';
-import { AgentExecutionContext, WorkflowExecution } from '../types';
+
+// Simple workflow definitions for the new Strands-based system
+interface WorkflowDefinition {
+  id: string;
+  name: string;
+  description: string;
+  steps: string[];
+  estimatedDuration: string;
+  agents: string[];
+}
+
+interface WorkflowExecution {
+  id: string;
+  workflowId: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  progress: number;
+  startTime: string;
+  endTime?: string;
+  results?: Record<string, unknown>;
+}
+
+// Mock workflow definitions that would integrate with Strands agents
+const mockWorkflows: WorkflowDefinition[] = [
+  {
+    id: 'supplier-onboarding',
+    name: 'Supplier Onboarding',
+    description: 'Complete supplier onboarding and initial assessment',
+    steps: [
+      'Document collection and validation',
+      'Compliance assessment',
+      'Risk evaluation',
+      'Certification verification',
+      'Final approval'
+    ],
+    estimatedDuration: '2-3 hours',
+    agents: ['document-intelligence', 'compliance-monitor', 'risk-predictor']
+  },
+  {
+    id: 'compliance-review',
+    name: 'Compliance Review',
+    description: 'Periodic compliance assessment and audit',
+    steps: [
+      'Regulatory status check',
+      'Certification review',
+      'Documentation audit',
+      'Risk assessment update',
+      'Compliance report generation'
+    ],
+    estimatedDuration: '1-2 hours',
+    agents: ['compliance-monitor', 'document-intelligence']
+  },
+  {
+    id: 'risk-assessment',
+    name: 'Risk Assessment',
+    description: 'Comprehensive risk analysis and mitigation planning',
+    steps: [
+      'Financial risk analysis',
+      'Operational risk evaluation',
+      'Supply chain assessment',
+      'Regulatory risk review',
+      'Mitigation strategy development'
+    ],
+    estimatedDuration: '45-60 minutes',
+    agents: ['risk-predictor', 'compliance-monitor']
+  }
+];
 
 const WorkflowDashboard: React.FC = () => {
-  const { 
-    isSystemReady, 
-    executeWorkflow, 
-    orchestrator 
-  } = useAgentSystem();
-  
-  const { getHealthSummary } = useAgentHealth();
-  const { getAvailableAgents, getAllCapabilities } = useAgentCapabilities();
-  
   const [activeWorkflows, setActiveWorkflows] = useState<WorkflowExecution[]>([]);
   const [selectedWorkflow, setSelectedWorkflow] = useState<string>('supplier-onboarding');
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionResults, setExecutionResults] = useState<WorkflowExecution[]>([]);
 
-  // Mock supplier data for testing
-  const mockSupplierData = {
-    supplier: {
-      id: 'SUP-001',
-      name: 'Global Pharma Solutions',
-      region: 'Europe',
-      category: 'Active Pharmaceutical Ingredients',
-      regulatoryStandard: 'EU GMP',
-      financialData: {
-        revenue: 50000000,
-        assets: 75000000,
-        debt: 15000000
-      },
-      lastReviewDate: '2024-01-15'
-    },
-    supplierDocuments: {
-      certificationType: 'EU GMP Certificate',
-      metadata: {
-        filename: 'gmp_certificate_2024.pdf',
-        uploadDate: '2024-01-15',
-        documentId: 'DOC-GMP-001'
+  // Mock execution function for demo - would integrate with Strands agents
+  const executeWorkflow = async (workflowId: string, context?: Record<string, unknown>) => {
+    setIsExecuting(true);
+    
+    const execution: WorkflowExecution = {
+      id: `exec_${Date.now()}`,
+      workflowId,
+      status: 'running',
+      progress: 0,
+      startTime: new Date().toISOString(),
+    };
+
+    setActiveWorkflows(prev => [...prev, execution]);
+
+    // Simulate workflow execution
+    const workflow = mockWorkflows.find(w => w.id === workflowId);
+    if (workflow) {
+      for (let i = 0; i <= 100; i += 20) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+        execution.progress = i;
+        setActiveWorkflows(prev => 
+          prev.map(w => w.id === execution.id ? { ...w, progress: i } : w)
+        );
       }
+
+      execution.status = 'completed';
+      execution.endTime = new Date().toISOString();
+      execution.results = {
+        message: `${workflow.name} completed successfully`,
+        agentsUsed: workflow.agents,
+        stepsCompleted: workflow.steps.length
+      };
+
+      setActiveWorkflows(prev => 
+        prev.map(w => w.id === execution.id ? execution : w)
+      );
+      
+      setExecutionResults(prev => [...prev, execution]);
     }
+
+    setIsExecuting(false);
   };
 
+  // Mock system status
+  const isSystemReady = true;
+  const availableAgents = ['compliance-monitor', 'risk-predictor', 'document-intelligence'];
+  const healthSummary = {
+    healthy: 3,
+    unhealthy: 0,
+    healthPercentage: 100
+  };
+  const allCapabilities = {
+    'Compliance Analysis': ['compliance-monitor'],
+    'Risk Assessment': ['risk-predictor'],
+    'Document Validation': ['document-intelligence'],
+    'Regulatory Tracking': ['compliance-monitor'],
+    'Financial Analysis': ['risk-predictor']
+  };
+  
   useEffect(() => {
-    // Update active workflows periodically
-    const interval = setInterval(() => {
-      if (orchestrator) {
-        const active = orchestrator.getWorkflowEngine().getActiveWorkflows();
-        setActiveWorkflows(active);
-      }
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, [orchestrator]);
+    // Mock initial data
+    const mockActiveWorkflow: WorkflowExecution = {
+      id: 'exec_demo',
+      workflowId: 'compliance-review',
+      status: 'running',
+      progress: 65,
+      startTime: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+    };
+    setActiveWorkflows([mockActiveWorkflow]);
+  }, []);
 
   const handleExecuteWorkflow = async () => {
     if (!isSystemReady || isExecuting) return;
 
     setIsExecuting(true);
     try {
-      const workflow = getWorkflowById(selectedWorkflow);
+      const workflow = mockWorkflows.find(w => w.id === selectedWorkflow);
       if (!workflow) {
         throw new Error(`Workflow ${selectedWorkflow} not found`);
       }
 
-      const context: AgentExecutionContext = {
-        sessionId: `workflow-${Date.now()}`,
-        userId: 'demo-user',
-        requestId: `req-${Date.now()}`,
-        timestamp: new Date().toISOString(),
-        metadata: {
-          workflowId: workflow.id,
-          ...mockSupplierData
-        }
-      };
-
-      const execution = await executeWorkflow(workflow, context);
-      setExecutionResults(prev => [execution, ...prev.slice(0, 9)]); // Keep last 10 results
-      
+      // Execute workflow with mock supplier data
+      await executeWorkflow(selectedWorkflow, {
+        supplierId: 'SUP-001',
+        supplierName: 'Global Pharma Solutions'
+      });
     } catch (error) {
       console.error('Workflow execution failed:', error);
-      alert(`Workflow execution failed: ${error}`);
     } finally {
       setIsExecuting(false);
     }
   };
-
-  const healthSummary = getHealthSummary();
-  const availableAgents = getAvailableAgents();
-  const allCapabilities = getAllCapabilities();
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -211,10 +285,11 @@ const WorkflowDashboard: React.FC = () => {
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 disabled={isExecuting}
               >
-                <option value="supplier-onboarding">Supplier Onboarding</option>
-                <option value="compliance-review">Compliance Review</option>
-                <option value="document-validation">Document Validation</option>
-                <option value="risk-assessment">Risk Assessment</option>
+                {mockWorkflows.map(workflow => (
+                  <option key={workflow.id} value={workflow.id}>
+                    {workflow.name}
+                  </option>
+                ))}
               </select>
             </div>
             
