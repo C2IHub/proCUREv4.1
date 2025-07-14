@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supplierApi, agentApi, metricsApi, auditApi, activityApi } from '../api/mockApi';
+import { supplierApi, agentApi, metricsApi, auditApi, activityApi } from '../api/strandsApi';
 import { Supplier } from '../types';
 
 // Query keys
