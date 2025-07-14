@@ -1,0 +1,21 @@
+{
+  "name": "document-intelligence-agent",
+  "version": "1.0.0",
+  "description": "AWS Lambda function for Document Intelligence Strands Agent",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "package": "npm run build && zip -r document-intelligence-lambda.zip dist/ node_modules/ package.json"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-agent-runtime": "^3.844.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.119",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
