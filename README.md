@@ -37,82 +37,95 @@ npm run build
 
 ## AWS Bedrock Configuration
 
-To enable AI agent functionality, you'll need to configure AWS Bedrock agents:
+### Quick Setup (Development)
 
-### 1. Set up AWS Credentials
-
-Configure AWS credentials using one of these methods:
-
-**Option A: AWS CLI**
+1. **Copy environment configuration:**
 ```bash
+cp .env.example .env
+```
+
+2. **Configure AWS credentials:**
+```bash
+# Option A: Use AWS CLI
 aws configure
+
+# Option B: Set environment variables in .env
+AWS_ACCESS_KEY_ID=your_access_key
+AWS_SECRET_ACCESS_KEY=your_secret_key
+AWS_REGION=us-east-1
 ```
 
-**Option B: Environment Variables**
+3. **Enable Bedrock integration:**
 ```bash
-export AWS_ACCESS_KEY_ID=your_access_key
-export AWS_SECRET_ACCESS_KEY=your_secret_key
-export AWS_DEFAULT_REGION=us-east-1
+# In .env file
+BEDROCK_ENABLED=true
+BEDROCK_FALLBACK_TO_MOCK=true  # Fallback to mock if AWS fails
+
+# Add your agent IDs after creating them in AWS Console
+BEDROCK_COMPLIANCE_AGENT_ID=your_compliance_agent_id
+BEDROCK_RISK_AGENT_ID=your_risk_agent_id
+BEDROCK_DOCUMENT_AGENT_ID=your_document_agent_id
 ```
 
-**Option C: IAM Roles** (recommended for production)
-Use IAM roles when running on AWS infrastructure.
+### Production Setup
 
-### 2. Create Bedrock Agents
+For production deployment with real AWS Bedrock agents, follow the comprehensive setup guide:
 
-Create three Bedrock agents in your AWS account:
+📖 **[Complete AWS Setup Guide](./docs/AWS_BEDROCK_SETUP.md)** - Detailed instructions for AWS Solution Architects
 
-1. **Compliance Agent**: For analyzing EU GMP, FDA, and other regulatory compliance
-2. **Risk Assessment Agent**: For predictive risk analysis and mitigation strategies  
-3. **Document Validation Agent**: For validating and processing supplier documentation
+🚀 **[Deployment Configuration](./docs/DEPLOYMENT_CONFIG.md)** - Production deployment options
 
-### 3. Configure Agent IDs
+The production setup includes:
+- **AWS Bedrock Agent Creation**: Step-by-step agent configuration
+- **IAM Roles and Policies**: Secure access configuration  
+- **Cost Optimization**: Budget alerts and optimization strategies
+- **Monitoring**: CloudWatch dashboards and alerting
+- **Security**: WAF, encryption, and compliance considerations
+- **Deployment Options**: ECS, Lambda, Docker configurations
 
-Update the BedrockAgentProvider with your agent configurations:
+### Agent Configuration
 
-```typescript
-// In src/context/BedrockAgentProvider.tsx
-const bedrockConfig = {
-  compliance: {
-    region: 'us-east-1',
-    agentId: 'your-compliance-agent-id',
-    agentAliasId: 'your-compliance-agent-alias-id'
-  },
-  risk: {
-    region: 'us-east-1', 
-    agentId: 'your-risk-agent-id',
-    agentAliasId: 'your-risk-agent-alias-id'
-  },
-  document: {
-    region: 'us-east-1',
-    agentId: 'your-document-agent-id', 
-    agentAliasId: 'your-document-agent-alias-id'
-  }
-};
+The platform uses three specialized AWS Bedrock agents:
+
+1. **EU GMP Compliance Monitor** (`compliance-monitor`)
+   - Regulatory compliance analysis and certification tracking
+   - Supports EU GMP, FDA, ISO standards
+   - Real-time compliance scoring and audit scheduling
+
+2. **Predictive Risk Assessor** (`risk-predictor`)
+   - Multi-factor risk assessment and prediction
+   - Financial, operational, and supply chain analysis
+   - Early warning system for supplier issues
+
+3. **Document Intelligence Agent** (`document-intelligence`)
+   - Document validation and authenticity verification
+   - Automated compliance checking and gap analysis
+   - Fraud detection and regulatory verification
+
+### Testing Integration
+
+Run the integration test suite to validate your setup:
+
+```bash
+# Run integration tests
+npm run test:integration
+
+# Test specific agent
+npm run test:bedrock -- --agent compliance
 ```
 
-### 4. Required IAM Permissions
+### Development vs Production
 
-Your AWS credentials need the following permissions:
+**Development Mode:**
+- Uses mock agents by default for offline development
+- Simulates real Bedrock responses with realistic delays
+- No AWS credentials required for basic development
 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "bedrock:InvokeAgent",
-        "bedrock:InvokeModel"
-      ],
-      "Resource": [
-        "arn:aws:bedrock:*:*:agent/*",
-        "arn:aws:bedrock:*:*:agent-alias/*"
-      ]
-    }
-  ]
-}
-```
+**Production Mode:**
+- Connects to real AWS Bedrock agents
+- Requires proper AWS credentials and agent configuration
+- Automatic fallback to mock agents if AWS is unavailable
+- Performance monitoring and cost tracking enabled
 
 ## Development Mode
 
