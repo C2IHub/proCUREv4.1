@@ -274,10 +274,12 @@ export interface WorkflowExecution {
   id: string;
   workflowId: string;
   status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  progress?: number;
   startTime: string;
   endTime?: string;
   context: AgentExecutionContext;
   stepResults: WorkflowStepResult[];
+  results?: Record<string, unknown>;
   error?: string;
 }
 

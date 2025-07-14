@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, Clock, CheckCircle, XCircle, AlertTriangle, Activity, Users, Workflow } from 'lucide-react';
+import { WorkflowExecution, WorkflowStepResult } from '../types';
 
 // Simple workflow definitions for the new Strands-based system
 interface WorkflowDefinition {
@@ -9,16 +10,6 @@ interface WorkflowDefinition {
   steps: string[];
   estimatedDuration: string;
   agents: string[];
-}
-
-interface WorkflowExecution {
-  id: string;
-  workflowId: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  progress: number;
-  startTime: string;
-  endTime?: string;
-  results?: Record<string, unknown>;
 }
 
 // Mock workflow definitions that would integrate with Strands agents
@@ -87,42 +78,77 @@ const WorkflowDashboard: React.FC = () => {
   const executeWorkflow = async (workflowId: string, context?: Record<string, unknown>) => {
     setIsExecuting(true);
     
+    const workflow = mockWorkflows.find(w => w.id === workflowId);
+    if (!workflow) {
+      setIsExecuting(false);
+      return;
+    }
+
+    // Initialize stepResults based on workflow steps
+    const initialStepResults: WorkflowStepResult[] = workflow.steps.map((step, index) => ({
+      stepId: `step_${index}`,
+      status: 'pending' as const,
+      startTime: new Date().toISOString()
+    }));
+
     const execution: WorkflowExecution = {
       id: `exec_${Date.now()}`,
       workflowId,
       status: 'running',
       progress: 0,
       startTime: new Date().toISOString(),
+      context: {
+        sessionId: `session_${Date.now()}`,
+        userId: 'demo_user',
+        requestId: `req_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        metadata: context || {}
+      },
+      stepResults: initialStepResults
     };
 
     setActiveWorkflows(prev => [...prev, execution]);
 
     // Simulate workflow execution
-    const workflow = mockWorkflows.find(w => w.id === workflowId);
-    if (workflow) {
-      for (let i = 0; i <= 100; i += 20) {
-        await new Promise(resolve => setTimeout(resolve, 500));
-        execution.progress = i;
-        setActiveWorkflows(prev => 
-          prev.map(w => w.id === execution.id ? { ...w, progress: i } : w)
-        );
-      }
-
-      execution.status = 'completed';
-      execution.endTime = new Date().toISOString();
-      execution.results = {
-        message: `${workflow.name} completed successfully`,
-        agentsUsed: workflow.agents,
-        stepsCompleted: workflow.steps.length
-      };
-
-      setActiveWorkflows(prev => 
-        prev.map(w => w.id === execution.id ? execution : w)
-      );
+    for (let i = 0; i <= 100; i += 20) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      execution.progress = i;
       
-      setExecutionResults(prev => [...prev, execution]);
+      // Update step results as we progress
+      const stepIndex = Math.floor((i / 100) * workflow.steps.length);
+      if (stepIndex < workflow.steps.length) {
+        execution.stepResults[stepIndex].status = i === 100 ? 'completed' : 'running';
+        if (i === 100) {
+          execution.stepResults[stepIndex].endTime = new Date().toISOString();
+        }
+      }
+      
+      setActiveWorkflows(prev => 
+        prev.map(w => w.id === execution.id ? { ...w, progress: i, stepResults: [...execution.stepResults] } : w)
+      );
     }
 
+    // Mark all steps as completed
+    execution.stepResults.forEach(step => {
+      step.status = 'completed';
+      if (!step.endTime) {
+        step.endTime = new Date().toISOString();
+      }
+    });
+
+    execution.status = 'completed';
+    execution.endTime = new Date().toISOString();
+    execution.results = {
+      message: `${workflow.name} completed successfully`,
+      agentsUsed: workflow.agents,
+      stepsCompleted: workflow.steps.length
+    };
+
+    setActiveWorkflows(prev => 
+      prev.map(w => w.id === execution.id ? execution : w)
+    );
+    
+    setExecutionResults(prev => [...prev, execution]);
     setIsExecuting(false);
   };
 
@@ -150,6 +176,20 @@ const WorkflowDashboard: React.FC = () => {
       status: 'running',
       progress: 65,
       startTime: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+      context: {
+        sessionId: 'session_demo',
+        userId: 'demo_user',
+        requestId: 'req_demo',
+        timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+        metadata: {}
+      },
+      stepResults: [
+        { stepId: 'step_0', status: 'completed', startTime: new Date(Date.now() - 30 * 60 * 1000).toISOString(), endTime: new Date(Date.now() - 25 * 60 * 1000).toISOString() },
+        { stepId: 'step_1', status: 'completed', startTime: new Date(Date.now() - 25 * 60 * 1000).toISOString(), endTime: new Date(Date.now() - 20 * 60 * 1000).toISOString() },
+        { stepId: 'step_2', status: 'running', startTime: new Date(Date.now() - 20 * 60 * 1000).toISOString() },
+        { stepId: 'step_3', status: 'pending', startTime: new Date().toISOString() },
+        { stepId: 'step_4', status: 'pending', startTime: new Date().toISOString() }
+      ]
     };
     setActiveWorkflows([mockActiveWorkflow]);
   }, []);
