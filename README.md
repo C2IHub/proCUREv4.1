@@ -102,6 +102,8 @@ The platform uses three specialized AWS Bedrock agents:
    - Automated compliance checking and gap analysis
    - Fraud detection and regulatory verification
 
+📋 **[Comprehensive Agent Cards](./docs/agent-cards/)** - Detailed specifications, function definitions, deployment guides, and AWS best practices for each agent
+
 ### Testing Integration
 
 Run the integration test suite to validate your setup:
